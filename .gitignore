@@ -1,0 +1,5 @@
+# Arquivo gerado pelo build — contém credenciais reais
+dist/
+
+# Vercel
+.vercel

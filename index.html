@@ -486,13 +486,13 @@ let acCompanyList = []; // for mapping dropdown
 let _mapCurrentClient = null; // client being mapped in modal
 
 // ─── SUPABASE — Dashboard ─────────────────────────────────────────────────────
-const SB_URL = 'https://opeprchaozuohrdguuzp.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZXByY2hhb3p1b2hyZGd1dXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NzUwMzIsImV4cCI6MjA5MjQ1MTAzMn0.q9kdemogFC8zuH0wMsf5BGdQnUEc5pgTpn3PSIahp8o';
+const SB_URL = '__DASHBOARD_SB_URL__';
+const SB_KEY = '__DASHBOARD_SB_KEY__';
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // ─── SUPABASE — Área do Cliente (CPL targets) ─────────────────────────────────
-const AC_SB_URL = 'https://dwbdzoljmdmihitssxhn.supabase.co';
-const AC_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3YmR6b2xqbWRtaWhpdHNzeGhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNDQ0MzgsImV4cCI6MjA4ODcyMDQzOH0.br531O7QiqPFm25d4pTOQVblHuwPwTEJLYyRkum3mFg';
+const AC_SB_URL = '__AC_SB_URL__';
+const AC_SB_KEY = '__AC_SB_KEY__';
 const acSb = supabase.createClient(AC_SB_URL, AC_SB_KEY);
 
 async function loadSquads(){
