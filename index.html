@@ -245,6 +245,67 @@
     .map-cpl-preview{font-size:12px;color:#8b949e;margin-top:8px;min-height:18px}
     .map-cpl-preview b{color:#58a6ff}
 
+    /* CLIENT PAGE (full-screen overlay) */
+    #client-page{position:fixed;inset:0;background:#0d1117;z-index:600;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow:hidden}
+    #client-page.open{transform:translateX(0)}
+    .cp-header{background:linear-gradient(135deg,#161b22,#1c2333);border-bottom:1px solid #30363d;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
+    .cp-back{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;flex-shrink:0}
+    .cp-back:hover{background:#30363d;color:#fff}
+    .cp-client-name{font-size:18px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cp-badges{display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0}
+    .cp-channel-badge{background:#1f3858;border:1px solid #388bfd44;color:#58a6ff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+    .cp-kpi-bar{display:flex;background:#161b22;border-bottom:1px solid #30363d;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+    .cp-kpi-bar::-webkit-scrollbar{display:none}
+    .cp-kpi-item{padding:11px 20px;border-right:1px solid #21262d;flex-shrink:0;min-width:110px}
+    .cp-kpi-item:last-child{border-right:none}
+    .cp-kpi-label{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-weight:600;white-space:nowrap}
+    .cp-kpi-value{font-size:17px;font-weight:800;color:#e6edf3;line-height:1}
+    .cp-kpi-sub{font-size:10px;color:#484f58;margin-top:3px;white-space:nowrap}
+    .cp-tabs{display:flex;border-bottom:1px solid #21262d;background:#161b22;flex-shrink:0;padding:0 22px;overflow-x:auto;scrollbar-width:none}
+    .cp-tabs::-webkit-scrollbar{display:none}
+    .cptab{padding:12px 18px;cursor:pointer;font-size:13px;font-weight:600;color:#8b949e;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
+    .cptab:hover{color:#c9d1d9}
+    .cptab.active{color:#58a6ff;border-bottom-color:#58a6ff}
+    .cp-body{flex:1;overflow-y:auto}
+    .cp-panel{display:none;padding:22px}
+    .cp-panel.active{display:block}
+
+    /* CP charts */
+    .cp-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+    .cp-chart-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px}
+    .cp-chart-card h4{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+    .cp-chart-canvas{position:relative;height:190px}
+
+    /* ClickUp Activities */
+    .cu-progress-wrap{margin-bottom:18px}
+    .cu-progress-label{font-size:12px;color:#8b949e;margin-bottom:7px}
+    .cu-progress{background:#21262d;border-radius:6px;height:8px;overflow:hidden}
+    .cu-progress-bar{height:100%;background:#3fb950;border-radius:6px;transition:width .4s}
+    .cu-section-title{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px}
+    .cu-task{background:#161b22;border:1px solid #30363d;border-radius:7px;padding:10px 13px;margin-bottom:6px;display:flex;align-items:flex-start;gap:9px}
+    .cu-task-done{opacity:.5}
+    .cu-check{font-size:14px;flex-shrink:0;margin-top:1px}
+    .cu-task-name{font-size:12px;color:#c9d1d9;flex:1;line-height:1.5;word-break:break-word}
+    .cu-status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;align-self:center}
+    .cu-due{font-size:10px;color:#8b949e;white-space:nowrap;flex-shrink:0;align-self:center}
+    .cu-due.overdue{color:#f85149;font-weight:600}
+    .cu-link-btn{background:none;border:1px dashed #30363d;color:#484f58;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+    .cu-link-btn:hover{border-color:#58a6ff;color:#58a6ff}
+
+    /* Parâmetros */
+    .param-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-bottom:22px}
+    .param-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px}
+    .param-card-title{font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #21262d}
+    .param-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #21262d}
+    .param-row:last-child{border-bottom:none}
+    .param-key{font-size:12px;color:#8b949e}
+    .param-val{font-size:13px;font-weight:700;color:#e6edf3}
+
+    /* ClickUp Map Modal */
+    #cu-map-overlay{position:fixed;inset:0;background:#0009;z-index:900;display:none;align-items:center;justify-content:center;padding:16px}
+    #cu-map-overlay.open{display:flex}
+    #cu-map-modal{background:#161b22;border:1px solid #30363d;border-radius:12px;width:min(480px,92vw);display:flex;flex-direction:column;overflow:hidden;animation:slideUp .2s ease}
+
     /* MOBILE CLIENT LIST (hidden on desktop) */
     .mcl{display:none;flex-direction:column;gap:1px;border-radius:10px;overflow:hidden;border:1px solid #30363d;margin-bottom:28px}
     .mcl-item{background:#161b22;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;min-height:56px}
@@ -342,6 +403,16 @@
       footer{padding:16px;font-size:10px}
     }
 
+    @media(max-width:768px){
+      .cp-client-name{font-size:15px}
+      .cp-header{padding:12px 16px}
+      .cp-kpi-item{padding:9px 14px;min-width:90px}
+      .cp-kpi-value{font-size:15px}
+      .cp-panel{padding:14px 16px}
+      .cp-charts{grid-template-columns:1fr}
+      .cp-chart-canvas{height:160px}
+      .param-grid{grid-template-columns:1fr}
+    }
     @media(max-width:400px){
       .tab{font-size:11px;padding:10px 8px}
       .badge{display:none}
@@ -461,6 +532,54 @@
   </div>
 </div>
 
+<!-- CLIENT PAGE (full-screen) -->
+<div id="client-page">
+  <div class="cp-header">
+    <button class="cp-back" onclick="closeClientPage()">← Voltar</button>
+    <div class="cp-client-name" id="cp-client-name">—</div>
+    <div class="cp-badges" id="cp-badges"></div>
+  </div>
+  <div class="cp-kpi-bar" id="cp-kpi-bar"></div>
+  <div class="cp-tabs" id="cp-tabs">
+    <div class="cptab active" onclick="switchCpTab('resultados')">📊 Resultados</div>
+    <div class="cptab" onclick="switchCpTab('campanhas')">📋 Campanhas</div>
+    <div class="cptab" onclick="switchCpTab('atividades')">✅ Atividades</div>
+    <div class="cptab" onclick="switchCpTab('parametros')">⚙️ Parâmetros</div>
+  </div>
+  <div class="cp-body">
+    <div class="cp-panel active" id="cp-panel-resultados"></div>
+    <div class="cp-panel" id="cp-panel-campanhas"></div>
+    <div class="cp-panel" id="cp-panel-atividades"></div>
+    <div class="cp-panel" id="cp-panel-parametros"></div>
+  </div>
+</div>
+
+<!-- CLICKUP FOLDER MAP MODAL -->
+<div id="cu-map-overlay" onclick="closeCuMapModal()">
+  <div id="cu-map-modal" onclick="event.stopPropagation()">
+    <div class="map-head">
+      <h3>🔗 Vincular Pasta ClickUp</h3>
+      <button class="drawer-close" onclick="closeCuMapModal()">✕</button>
+    </div>
+    <div class="map-body">
+      <div class="map-field">
+        <label>Cliente no Dashboard</label>
+        <div class="map-val" id="cu-map-dash-name">—</div>
+      </div>
+      <div class="map-field">
+        <label>Pasta no ClickUp (espaço Clientes)</label>
+        <select class="map-select" id="cu-map-folder-select">
+          <option value="">— sem vínculo —</option>
+        </select>
+      </div>
+    </div>
+    <div class="map-footer">
+      <button class="btn" onclick="closeCuMapModal()">Cancelar</button>
+      <button class="btn" style="background:#1f3858;border-color:#388bfd55;color:#58a6ff" onclick="saveCuMapping()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <footer>Revenue Lab · Dashboard em tempo real · Dados atualizados diariamente às 8h</footer>
 
 <script>
@@ -533,11 +652,17 @@ async function loadCplTargets(){
       });
       acCompanyList.sort((a,b)=>a.localeCompare(b,'pt-BR'));
     }
-    // Fetch name mappings from dashboard Supabase
-    const {data:mapData}=await sb.from('client_mapping').select('dashboard_name,ac_company_name');
+    // Fetch name+clickup mappings from dashboard Supabase
+    // clientMapping: { dashName: { acName: string|null, clickupFolderId: string|null } }
+    const {data:mapData}=await sb.from('client_mapping').select('dashboard_name,ac_company_name,clickup_folder_id');
     if(mapData){
       clientMapping={};
-      mapData.forEach(r=>clientMapping[r.dashboard_name]=r.ac_company_name);
+      mapData.forEach(r=>{
+        clientMapping[r.dashboard_name]={
+          acName: r.ac_company_name||null,
+          clickupFolderId: r.clickup_folder_id||null
+        };
+      });
     }
   }catch(e){ console.warn('[CPL] loadCplTargets error:',e.message); }
 }
@@ -546,12 +671,64 @@ async function loadCplTargets(){
 function getCplTarget(dashName){
   // 1. Explicit mapping
   const mapped=clientMapping[dashName];
-  if(mapped && cplTargets[mapped]!=null) return {value:cplTargets[mapped], acName:mapped};
-  // 2. Auto-match by normalised name (case-insensitive, trimmed)
+  const mappedAc = mapped?.acName;
+  if(mappedAc && cplTargets[mappedAc]!=null) return {value:cplTargets[mappedAc], acName:mappedAc};
+  // 2. Auto-match by normalised name
   const norm=dashName.toLowerCase().trim();
   const ac=acCompanyList.find(n=>n.toLowerCase().trim()===norm);
   if(ac && cplTargets[ac]!=null) return {value:cplTargets[ac], acName:ac};
   return null;
+}
+
+// Normalize string for fuzzy matching (remove accents, lowercase, trim)
+function normStr(s){
+  return (s||'').toLowerCase().trim()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ');
+}
+
+// ─── CLICKUP FOLDER MAP ───────────────────────────────────────────────────────
+const CU_SPACE_ID = '90090377342';
+const CU_FOLDERS = [
+  {id:'90133132396',name:'Revenue Lab'},{id:'90091004681',name:'Óticas Brasil'},
+  {id:'90131020369',name:'Go vendas'},{id:'90131734949',name:'Grupo Aj'},
+  {id:'90133288147',name:'Tetralite'},{id:'90132148962',name:'Rede Pop'},
+  {id:'90091004658',name:'Boa noite Colchões'},{id:'90134244751',name:'Dr Ulyscélio'},
+  {id:'90138731003',name:'Festa de Luxo'},{id:'901314571929',name:'PetKlinic'},
+  {id:'90136881468',name:'Imobitech'},{id:'90091004673',name:'RGM'},
+  {id:'90134144657',name:'Nectar Crm'},{id:'90133157058',name:'Cical Honda'},
+  {id:'90091004669',name:'FLASH CAR AUTO CENTER'},{id:'90134190733',name:'Nacional Kart'},
+  {id:'90137543120',name:'NeuroExperts'},{id:'90133101447',name:'AZFIT'},
+  {id:'901313902635',name:'Empório Kids'},{id:'901314276598',name:'Dr Jorge Pinho'},
+  {id:'901313651040',name:'Nexus'},{id:'901314981180',name:'CondoID'},
+  {id:'901315145921',name:'Bio Cosméticos'},{id:'901315294826',name:'Inove Agropeças'},
+  {id:'901315484069',name:'Vital Centro de Saúde'},{id:'901315637343',name:'Mercado Pet Store'},
+  {id:'901315920301',name:'Distribuidora Oeste'},{id:'901315924476',name:'Mitra LAB'},
+  {id:'901315924488',name:'Hypado'},{id:'901315965985',name:'RHEIMS'},
+  {id:'901316124376',name:'Africa PET STORE'},{id:'901316612751',name:'Klooks'},
+  {id:'901316612967',name:'Escribo'},{id:'901317238620',name:'Dr. Eduardo Moura'},
+  {id:'901317350680',name:'Aliare /myFarm'},{id:'901317397837',name:'Funsales'},
+  {id:'901317488127',name:'2com'},{id:'901317558451',name:'Niko Kids'},
+  {id:'901317673213',name:'Nomus ERP'},{id:'901317801444',name:'Dra. Laura'},
+  {id:'901317821050',name:'Container Software'},{id:'901317959954',name:'revo360'},
+  {id:'901317965377',name:'Colégio Cordeiro'},{id:'901318063989',name:'Única Distribuidora'},
+  {id:'901318084124',name:'Riachuelo Seguros'}
+];
+
+function getClickupFolder(dashName){
+  // 1. Explicit mapping from Supabase
+  const m=clientMapping[dashName];
+  if(m?.clickupFolderId) return m.clickupFolderId;
+  // 2. Auto-match by normalized name
+  const norm=normStr(dashName);
+  const exact=CU_FOLDERS.find(f=>normStr(f.name)===norm);
+  if(exact) return exact.id;
+  // 3. Partial match
+  const partial=CU_FOLDERS.find(f=>{
+    const fn=normStr(f.name);
+    return fn.includes(norm)||norm.includes(fn);
+  });
+  return partial?.id||null;
 }
 
 // Render CPL target badge cell
@@ -586,7 +763,7 @@ function openMapModal(dashName){
 
   // Populate dropdown
   const sel=document.getElementById('map-ac-select');
-  const curMapped=clientMapping[dashName]||'';
+  const curMapped=clientMapping[dashName]?.acName||'';
   sel.innerHTML='<option value="">— sem vínculo —</option>'+
     acCompanyList.map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===curMapped?' selected':''}>${n}${cplTargets[n]!=null?' (CPL: '+fmtMoney(cplTargets[n])+')':''}</option>`).join('');
 
@@ -614,15 +791,25 @@ function onMapSelectChange(){
 async function saveMapping(){
   if(!_mapCurrentClient)return;
   const acName=document.getElementById('map-ac-select').value;
+  const _prev=clientMapping[_mapCurrentClient]||{};
   if(acName){
     await sb.from('client_mapping').upsert(
-      {dashboard_name:_mapCurrentClient, ac_company_name:acName, updated_at:new Date().toISOString()},
+      {dashboard_name:_mapCurrentClient, ac_company_name:acName, clickup_folder_id:_prev.clickupFolderId||null, updated_at:new Date().toISOString()},
       {onConflict:'dashboard_name'}
     );
-    clientMapping[_mapCurrentClient]=acName;
+    clientMapping[_mapCurrentClient]={ acName, clickupFolderId:_prev.clickupFolderId||null };
   } else {
-    await sb.from('client_mapping').delete().eq('dashboard_name',_mapCurrentClient);
-    delete clientMapping[_mapCurrentClient];
+    if(_prev.clickupFolderId){
+      // Preserve the ClickUp mapping but clear AC name
+      await sb.from('client_mapping').upsert(
+        {dashboard_name:_mapCurrentClient, ac_company_name:null, clickup_folder_id:_prev.clickupFolderId, updated_at:new Date().toISOString()},
+        {onConflict:'dashboard_name'}
+      );
+      clientMapping[_mapCurrentClient]={ acName:null, clickupFolderId:_prev.clickupFolderId };
+    } else {
+      await sb.from('client_mapping').delete().eq('dashboard_name',_mapCurrentClient);
+      delete clientMapping[_mapCurrentClient];
+    }
   }
   closeMapModal();
   applyFilter();
@@ -874,7 +1061,7 @@ function renderSection(rows,cfg,p,containerId,prefix,canal){
     const trend=s.declining3d?`<span class="trend-dn">📉 Queda</span>`
       :s.trendDir==='up'?`<span class="trend-up">📈 Alta</span>`:`<span class="trend-fl">➡️ Estável</span>`;
     return`<tr>
-      <td><span class="client-link" onclick="openDrawer('${s.name.replace(/'/g,"\\'")}','${prefix}')">${s.name}</span></td>
+      <td><span class="client-link" onclick="openClientPage('${s.name.replace(/'/g,"\\'")}','${prefix}')">${s.name}</span></td>
       <td><span class="pill ${pillCls(s.status)}">${pillIco(s.status)} ${s.status}</span></td>
       <td>${squadCell(s.name)}</td>
       <td>${fmtNum(s.conv1)}</td><td>${fmtNum(s.conv2)}</td>
@@ -892,7 +1079,7 @@ function renderSection(rows,cfg,p,containerId,prefix,canal){
   const mclItem=s=>{
     const trendIco=s.declining3d?'📉':s.trendDir==='up'?'📈':'➡️';
     const trendCls=s.declining3d?'trend-dn':s.trendDir==='up'?'trend-up':'trend-fl';
-    return`<div class="mcl-item" onclick="openDrawer('${s.name.replace(/'/g,"\\'")}','${prefix}')">
+    return`<div class="mcl-item" onclick="openClientPage('${s.name.replace(/'/g,"\\'")}','${prefix}')">
       <div class="mcl-left">
         <span class="pill ${pillCls(s.status)}" style="flex-shrink:0">${pillIco(s.status)}</span>
         <div style="min-width:0;flex:1">
@@ -1197,6 +1384,9 @@ function switchDTab(idx){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(document.getElementById('preview-overlay').classList.contains('open')) closePreview();
+    else if(document.getElementById('cu-map-overlay').classList.contains('open')) closeCuMapModal();
+    else if(document.getElementById('map-overlay').classList.contains('open')) closeMapModal();
+    else if(document.getElementById('client-page').classList.contains('open')) closeClientPage();
     else closeDrawer();
   }
 });
@@ -1462,6 +1652,480 @@ function renderGoogleGroups(rows){
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['meta','google'][i]===tab));
   document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',['meta','google'][i]===tab));
+}
+
+// ─── CLIENT PAGE STATE ────────────────────────────────────────────────────────
+let cpClient    = null;
+let cpChannel   = null;
+let cpStats     = null;
+let cpPeriod    = null;
+let cpAllRows   = [];
+let cpActiveTab = 'resultados';
+let cpCharts    = {};
+let _cuMapCurrentClient = null;
+
+// ─── OPEN / CLOSE CLIENT PAGE ────────────────────────────────────────────────
+function openClientPage(clientName, channel){
+  cpClient   = clientName;
+  cpChannel  = channel;
+  cpActiveTab= 'resultados';
+
+  // Build period (same logic as openDrawer)
+  const dateKey = CFG[channel].dateKey;
+  let p;
+  if(activeDays===0||activeDays==='today'||activeDays==='yesterday'){
+    const from=document.getElementById('date-from').value;
+    const to  =document.getElementById('date-to').value;
+    p=(from&&to)?buildPeriod(from,to):periodFromDays(RAW[channel],dateKey,7);
+  } else {
+    p=periodFromDays(RAW[channel],dateKey,activeDays);
+  }
+  cpPeriod = p;
+
+  cpAllRows = RAW[channel].filter(r=>{
+    const name=r[CFG[channel].accountKey]?.trim();
+    const date=fmtDate(r[dateKey]);
+    return name===clientName && p && inRange(date,p.p1s,p.p1e);
+  });
+
+  // Find client stats object
+  const allStats = buildStats(RAW[channel], CFG[channel], p);
+  cpStats = allStats.find(s=>s.name===clientName)||null;
+
+  // Header
+  document.getElementById('cp-client-name').textContent = clientName;
+  const sq=squads[clientName]||'';
+  document.getElementById('cp-badges').innerHTML =
+    `<span class="cp-channel-badge">${channel==='meta'?'📱 Meta Ads':'🔍 Google Ads'}</span>`+
+    (sq?`<span class="cp-channel-badge" style="background:${sq==='Caça ROI'?'#1f3858':'#0d2118'};border-color:${sq==='Caça ROI'?'#388bfd44':'#3fb95044'};color:${sq==='Caça ROI'?'#58a6ff':'#3fb950'}">${sq==='Caça ROI'?'🎯':'🔒'} ${sq}</span>`:'' );
+
+  // KPI bar
+  renderCpKpiBar();
+
+  // Reset tabs to Resultados
+  const tabKeys=['resultados','campanhas','atividades','parametros'];
+  document.querySelectorAll('.cptab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.cp-panel').forEach((el,i)=>el.classList.toggle('active',i===0));
+
+  // Render first tab
+  renderCpResultados();
+
+  // Show page
+  document.getElementById('client-page').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  // Preload Atividades + Parâmetros in background (lazy)
+  setTimeout(()=>{ renderCpAtividades(); renderCpParametros(); }, 200);
+}
+
+function closeClientPage(){
+  Object.values(cpCharts).forEach(c=>{try{c.destroy();}catch(_){}});
+  cpCharts={};
+  document.getElementById('client-page').classList.remove('open');
+  document.body.style.overflow='';
+  cpClient=null; cpChannel=null; cpStats=null; cpPeriod=null; cpAllRows=[];
+}
+
+function switchCpTab(tab){
+  cpActiveTab=tab;
+  const keys=['resultados','campanhas','atividades','parametros'];
+  document.querySelectorAll('.cptab').forEach((t,i)=>t.classList.toggle('active',keys[i]===tab));
+  document.querySelectorAll('.cp-panel').forEach((el,i)=>el.classList.toggle('active',keys[i]===tab));
+  if(tab==='campanhas') renderCpCampanhas();
+}
+
+// ─── KPI BAR ─────────────────────────────────────────────────────────────────
+function renderCpKpiBar(){
+  const bar=document.getElementById('cp-kpi-bar');
+  if(!cpStats||!cpPeriod){ bar.innerHTML=''; return; }
+  const s=cpStats;
+  const cplT=getCplTarget(cpClient);
+  const delta=(cplT&&s.cpl1!=null)?((s.cpl1-cplT.value)/cplT.value*100):null;
+  const dCls=delta==null?'fl':delta<=0?'up':delta<=30?'warn':'dn';
+  bar.innerHTML=`
+    <div class="cp-kpi-item"><div class="cp-kpi-label">Investido</div><div class="cp-kpi-value sum-accent">${fmtMoney(s.spend1)}</div><div class="cp-kpi-sub">${cpPeriod.label1}</div></div>
+    <div class="cp-kpi-item"><div class="cp-kpi-label">${cpChannel==='meta'?'Leads / Conv.':'Conversões'}</div><div class="cp-kpi-value">${fmtNum(s.conv1)}</div><div class="cp-kpi-sub">ant. ${fmtNum(s.conv2)}</div></div>
+    <div class="cp-kpi-item"><div class="cp-kpi-label">CPL Real</div><div class="cp-kpi-value">${fmtMoney(s.cpl1)}</div><div class="cp-kpi-sub">ant. ${fmtMoney(s.cpl2)}</div></div>
+    <div class="cp-kpi-item"><div class="cp-kpi-label">CPL Alvo</div><div class="cp-kpi-value">${cplT?fmtMoney(cplT.value):'—'}</div><div class="cp-kpi-sub">${cplT?cplT.acName:'não vinculado'}</div></div>
+    <div class="cp-kpi-item"><div class="cp-kpi-label">Δ vs Alvo</div><div class="cp-kpi-value ${dCls}">${delta!=null?(delta>=0?'+':'')+delta.toFixed(1)+'%':'—'}</div><div class="cp-kpi-sub">${delta!=null?(delta<=0?'✅ dentro da meta':'🚨 acima da meta'):'vincular AC'}</div></div>
+    <div class="cp-kpi-item"><div class="cp-kpi-label">Var. Conv.</div><div class="cp-kpi-value ${varCls(s.varConv,false)}">${fmtPct(s.varConv)}</div><div class="cp-kpi-sub">vs período ant.</div></div>
+  `;
+}
+
+// ─── TAB: RESULTADOS ─────────────────────────────────────────────────────────
+function renderCpResultados(){
+  const el=document.getElementById('cp-panel-resultados');
+  if(!cpStats||!cpPeriod){ el.innerHTML='<div class="empty">Sem dados no período.</div>'; return; }
+  const s=cpStats;
+
+  // Destroy old charts
+  ['_cpLine','_cpBar'].forEach(k=>{ if(cpCharts[k]){cpCharts[k].destroy();delete cpCharts[k];} });
+
+  // Build CPL time series (per-day)
+  const days=[], cpls=[];
+  for(let i=cpPeriod.span;i>=0;i--){
+    const d=addDays(cpPeriod.p1e,-i);
+    const dr=cpAllRows.filter(r=>fmtDate(r[CFG[cpChannel].dateKey])===d);
+    const ds=dr.reduce((a,r)=>a+(cpChannel==='meta'?num(r['Valor investido']):num(r['Gasto'])),0);
+    const dc=dr.reduce((a,r)=>a+CFG[cpChannel].convKeys.reduce((b,k)=>b+num(r[k]),0),0);
+    days.push(fmtBR(d));
+    cpls.push(dc>0?parseFloat((ds/dc).toFixed(2)):null);
+  }
+
+  const cplT=getCplTarget(cpClient);
+
+  el.innerHTML=`
+    <div class="cp-charts">
+      <div class="cp-chart-card">
+        <h4>CPL ao longo do período</h4>
+        <div class="cp-chart-canvas"><canvas id="cp-chart-line"></canvas></div>
+      </div>
+      <div class="cp-chart-card">
+        <h4>Comparativo: atual vs anterior</h4>
+        <div class="cp-chart-canvas"><canvas id="cp-chart-bar"></canvas></div>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Período</th><th>Conversões</th><th>Investimento</th><th>CPL / CPA</th><th>Var. Conv.</th><th>Var. CPL</th><th>Var. Invest.</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>${cpPeriod.label1}</b> (atual)</td>
+          <td>${fmtNum(s.conv1)}</td>
+          <td>${fmtMoney(s.spend1)}</td>
+          <td class="${cplActualCls(cpClient,s.cpl1)}">${fmtMoney(s.cpl1)}</td>
+          <td>—</td><td>—</td><td>—</td>
+        </tr>
+        <tr>
+          <td>${cpPeriod.label2} (anterior)</td>
+          <td>${fmtNum(s.conv2)}</td>
+          <td>${fmtMoney(s.spend2)}</td>
+          <td>${fmtMoney(s.cpl2)}</td>
+          <td class="${varCls(s.varConv,false)}">${fmtPct(s.varConv)}</td>
+          <td class="${varCls(s.varCpl,true)}">${fmtPct(s.varCpl)}</td>
+          <td class="${varCls(s.varSpend,false)}">${fmtPct(s.varSpend)}</td>
+        </tr>
+      </tbody>
+    </table></div>
+  `;
+
+  // Line chart — CPL evolution
+  const lineCtx=document.getElementById('cp-chart-line')?.getContext('2d');
+  if(lineCtx){
+    const datasets=[{
+      label:'CPL (R$)',data:cpls,
+      borderColor:'#58a6ff',backgroundColor:'#58a6ff18',
+      tension:.35,fill:true,spanGaps:true,
+      pointRadius:2,pointHoverRadius:5,
+    }];
+    if(cplT) datasets.push({
+      label:`Alvo (${fmtMoney(cplT.value)})`,
+      data:days.map(()=>cplT.value),
+      borderColor:'#3fb950',borderDash:[5,4],
+      fill:false,pointRadius:0,tension:0,borderWidth:2,
+    });
+    cpCharts['_cpLine']=new Chart(lineCtx,{
+      type:'line',data:{labels:days,datasets},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false}},
+        scales:{
+          x:{ticks:{color:'#484f58',font:{size:9},maxRotation:45},grid:{color:'#21262d'}},
+          y:{ticks:{color:'#484f58',font:{size:9},callback:v=>'R$'+v.toFixed(0)},grid:{color:'#21262d'}},
+        }
+      }
+    });
+  }
+
+  // Bar chart — period comparison
+  const barCtx=document.getElementById('cp-chart-bar')?.getContext('2d');
+  if(barCtx){
+    cpCharts['_cpBar']=new Chart(barCtx,{
+      type:'bar',
+      data:{
+        labels:[cpPeriod.label1+' (atual)', cpPeriod.label2+' (ant.)'],
+        datasets:[
+          {label:'Conversões',data:[s.conv1,s.conv2],
+           backgroundColor:['#58a6ff99','#58a6ff44'],borderColor:['#58a6ff','#58a6ff88'],borderWidth:1},
+          {label:'Investimento (÷100)',data:[s.spend1/100,s.spend2/100],
+           backgroundColor:['#e3b34199','#e3b34144'],borderColor:['#e3b341','#e3b34188'],borderWidth:1,yAxisID:'y1'},
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}},
+        scales:{
+          x:{ticks:{color:'#484f58',font:{size:9}},grid:{color:'#21262d'}},
+          y:{ticks:{color:'#484f58',font:{size:9}},grid:{color:'#21262d'},title:{display:true,text:'Conv.',color:'#484f58',font:{size:9}}},
+          y1:{position:'right',ticks:{color:'#e3b341',font:{size:9},callback:v=>'R$'+(v*100).toFixed(0)},grid:{display:false},title:{display:true,text:'Invest.',color:'#e3b341',font:{size:9}}},
+        }
+      }
+    });
+  }
+}
+
+// ─── TAB: CAMPANHAS ──────────────────────────────────────────────────────────
+function renderCpCampanhas(){
+  const el=document.getElementById('cp-panel-campanhas');
+  if(el.dataset.rendered==='1') return; // already rendered
+  if(!cpAllRows.length){ el.innerHTML='<div class="empty">Sem dados no período.</div>'; return; }
+
+  if(cpChannel==='meta'){
+    el.innerHTML=`
+      <div style="display:flex;border-bottom:1px solid #21262d;margin:-22px -22px 18px;padding:0 22px;background:#161b22">
+        <div class="dtab active" id="cpct-0" onclick="cpCampTab(0,3)">📊 Campanhas</div>
+        <div class="dtab" id="cpct-1" onclick="cpCampTab(1,3)">🎯 Conjuntos</div>
+        <div class="dtab" id="cpct-2" onclick="cpCampTab(2,3)">🎨 Anúncios</div>
+      </div>
+      <div id="cp-cp-0">${renderMetaCampaigns(cpAllRows)}</div>
+      <div id="cp-cp-1" style="display:none">${renderMetaAdsets(cpAllRows)}</div>
+      <div id="cp-cp-2" style="display:none">${renderMetaAds(cpAllRows)}</div>
+    `;
+  } else {
+    el.innerHTML=`
+      <div style="display:flex;border-bottom:1px solid #21262d;margin:-22px -22px 18px;padding:0 22px;background:#161b22">
+        <div class="dtab active" id="cpct-0" onclick="cpCampTab(0,2)">📊 Campanhas</div>
+        <div class="dtab" id="cpct-1" onclick="cpCampTab(1,2)">🔑 Grupos</div>
+      </div>
+      <div id="cp-cp-0">${renderGoogleCampaigns(cpAllRows)}</div>
+      <div id="cp-cp-1" style="display:none">${renderGoogleGroups(cpAllRows)}</div>
+    `;
+  }
+  el.dataset.rendered='1';
+}
+
+function cpCampTab(idx, total){
+  for(let i=0;i<total;i++){
+    document.getElementById('cpct-'+i)?.classList.toggle('active',i===idx);
+    const p=document.getElementById('cp-cp-'+i);
+    if(p) p.style.display=i===idx?'block':'none';
+  }
+}
+
+// ─── TAB: ATIVIDADES (ClickUp) ───────────────────────────────────────────────
+async function renderCpAtividades(){
+  const el=document.getElementById('cp-panel-atividades');
+  if(!cpClient) return;
+
+  const folderId=getClickupFolder(cpClient);
+  if(!folderId){
+    el.innerHTML=`
+      <div class="empty" style="padding:32px 20px">
+        <div style="margin-bottom:14px;font-size:14px">Nenhuma pasta ClickUp vinculada a este cliente.</div>
+        <div style="font-size:12px;color:#484f58;margin-bottom:16px">Tente vincular manualmente ou verifique se o nome está correto.</div>
+        <button class="cu-link-btn" onclick="openCuMapModal('${cpClient.replace(/'/g,"\\'")}')">🔗 Vincular pasta ClickUp</button>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML='<div class="empty"><div class="spinner" style="margin:0 auto 12px"></div><p>Carregando atividades do ClickUp…</p></div>';
+
+  try{
+    // 1. Get lists for this folder
+    const listsRes=await fetch(`/api/clickup?path=folder/${folderId}/list`);
+    if(!listsRes.ok) throw new Error('Erro ao buscar listas ('+listsRes.status+')');
+    const listsData=await listsRes.json();
+    if(listsData.err) throw new Error(listsData.err);
+    const lists=listsData.lists||[];
+
+    // 2. Find "Geral" list (case-insensitive), fallback to first
+    const geralList=lists.find(l=>l.name?.toLowerCase()==='geral')||lists[0];
+    if(!geralList){
+      el.innerHTML='<div class="empty">Lista "Geral" não encontrada nesta pasta ClickUp.<br><small>Pastas disponíveis: '+lists.map(l=>l.name).join(', ')+'</small></div>';
+      return;
+    }
+
+    // 3. Get tasks from Geral list
+    const tasksRes=await fetch(`/api/clickup?path=list/${geralList.id}/task&subtasks=true&include_closed=true&page=0`);
+    if(!tasksRes.ok) throw new Error('Erro ao buscar tarefas ('+tasksRes.status+')');
+    const tasksData=await tasksRes.json();
+    if(tasksData.err) throw new Error(tasksData.err);
+    const tasks=tasksData.tasks||[];
+
+    // 4. Split open vs closed
+    const isClosed=t=>{
+      const st=(t.status?.status||'').toLowerCase();
+      return t.status?.type==='closed'||st==='complete'||st==='done'||st==='concluído'||st==='concluida'||st==='closed';
+    };
+    const closed=tasks.filter(isClosed);
+    const open  =tasks.filter(t=>!isClosed(t));
+    const total =tasks.length;
+    const pct   =total>0?Math.round(closed.length/total*100):0;
+
+    // 5. Sort open by due date asc (nulls last)
+    const openSorted=[...open].sort((a,b)=>{
+      if(!a.due_date&&!b.due_date)return 0;
+      if(!a.due_date)return 1;
+      if(!b.due_date)return-1;
+      return parseInt(a.due_date)-parseInt(b.due_date);
+    });
+    // 6. Recent closed (top 10 by date_closed desc)
+    const recentClosed=[...closed].sort((a,b)=>{
+      const ta=parseInt(a.date_closed||a.date_updated||0);
+      const tb=parseInt(b.date_closed||b.date_updated||0);
+      return tb-ta;
+    }).slice(0,10);
+
+    const today=Date.now();
+    const fmtDue=ts=>{
+      if(!ts)return null;
+      const ms=parseInt(ts);
+      const d=new Date(ms);
+      const diff=Math.ceil((ms-today)/86400000);
+      return{str:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}), overdue:diff<0, diff};
+    };
+
+    const taskHtml=t=>{
+      const done=isClosed(t);
+      const due=t.due_date?fmtDue(t.due_date):null;
+      const sc=t.status?.color||'#8b949e';
+      const sn=t.status?.status||'';
+      return`<div class="cu-task${done?' cu-task-done':''}">
+        <span class="cu-check">${done?'✅':'⬜'}</span>
+        <div class="cu-task-name">${t.name}</div>
+        ${sn?`<span class="cu-status-badge" style="background:${sc}22;color:${sc};border:1px solid ${sc}44">${sn}</span>`:''}
+        ${due?`<span class="cu-due${due.overdue?' overdue':''}">${due.overdue?'⚠️':''} ${due.str}</span>`:''}
+      </div>`;
+    };
+
+    const safeName=cpClient.replace(/'/g,"\\'");
+    el.innerHTML=`
+      <div class="cu-progress-wrap">
+        <div class="cu-progress-label">${closed.length} de ${total} tarefas concluídas (${pct}%) — lista <b>${geralList.name}</b></div>
+        <div class="cu-progress"><div class="cu-progress-bar" style="width:${pct}%"></div></div>
+      </div>
+      <div style="text-align:right;margin-bottom:8px">
+        <button class="cu-link-btn" onclick="openCuMapModal('${safeName}')">🔗 Mudar pasta</button>
+      </div>
+      ${openSorted.length
+        ?`<div class="cu-section-title">📋 Em aberto (${openSorted.length})</div>${openSorted.map(taskHtml).join('')}`
+        :'<div class="cu-section-title">📋 Em aberto</div><div class="cu-task"><span class="cu-check">🎉</span><div class="cu-task-name">Nenhuma tarefa em aberto!</div></div>'
+      }
+      ${recentClosed.length
+        ?`<div class="cu-section-title">✅ Concluídas recentes (${recentClosed.length})</div>${recentClosed.map(taskHtml).join('')}`
+        :''
+      }
+    `;
+  }catch(err){
+    console.error('[ClickUp]',err);
+    const safeName=cpClient.replace(/'/g,"\\'");
+    el.innerHTML=`
+      <div class="error-box">⚠️ Erro ao carregar atividades: ${err.message}</div>
+      <div style="margin-top:12px">
+        <button class="cu-link-btn" onclick="openCuMapModal('${safeName}')">🔗 Vincular pasta diferente</button>
+      </div>`;
+  }
+}
+
+// ─── TAB: PARÂMETROS (Área do Cliente) ───────────────────────────────────────
+async function renderCpParametros(){
+  const el=document.getElementById('cp-panel-parametros');
+  if(!cpClient) return;
+
+  const cplT=getCplTarget(cpClient);
+  const acName=cplT?.acName||(clientMapping[cpClient]?.acName)||null;
+
+  if(!acName){
+    const safeName=cpClient.replace(/'/g,"\\'");
+    el.innerHTML=`
+      <div class="empty" style="padding:32px 20px">
+        <div style="margin-bottom:14px;font-size:14px">Nenhum projeto da Área do Cliente vinculado.</div>
+        <button class="map-btn" style="padding:6px 14px;font-size:12px" onclick="openMapModal('${safeName}')">🔗 Vincular Área do Cliente</button>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML='<div class="empty"><div class="spinner" style="margin:0 auto 12px"></div><p>Carregando parâmetros da Área do Cliente…</p></div>';
+
+  try{
+    const {data,error}=await acSb.from('roi_details_public').select('*').eq('company_name',acName).limit(1);
+    if(error) throw error;
+    const r=data?.[0];
+    if(!r){ el.innerHTML=`<div class="empty">Nenhum dado ROI encontrado para "<b>${acName}</b>".</div>`; return; }
+
+    const fmtN=v=>v!=null?parseFloat(v).toLocaleString('pt-BR',{maximumFractionDigits:0}):'—';
+    const fmtM=v=>v!=null?'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+    const fmtP=v=>v!=null?parseFloat(v).toFixed(1)+'%':'—';
+
+    el.innerHTML=`
+      <div style="margin-bottom:16px;font-size:12px;color:#8b949e">
+        Projeto vinculado: <b style="color:#58a6ff">${acName}</b>
+        <button class="map-btn" style="margin-left:10px" onclick="openMapModal('${cpClient.replace(/'/g,"\\'")}')">✎ alterar</button>
+      </div>
+      <div class="param-grid">
+        <div class="param-card">
+          <div class="param-card-title">💰 Investimento</div>
+          <div class="param-row"><span class="param-key">Verba de Mídia</span><span class="param-val">${fmtM(r.media_orcamento)}</span></div>
+          <div class="param-row"><span class="param-key">Custo de Gestão</span><span class="param-val">${fmtM(r.custo_marketing)}</span></div>
+          <div class="param-row"><span class="param-key">Total</span><span class="param-val" style="color:#58a6ff">${fmtM(r.total_investimento)}</span></div>
+        </div>
+        <div class="param-card">
+          <div class="param-card-title">🎯 Funil Necessário</div>
+          <div class="param-row"><span class="param-key">Leads necessários</span><span class="param-val">${fmtN(r.leads_necessarios)}</span></div>
+          <div class="param-row"><span class="param-key">MQLs</span><span class="param-val">${fmtN(r.mqls_necessarios)}</span></div>
+          <div class="param-row"><span class="param-key">SQLs</span><span class="param-val">${fmtN(r.sqls_necessarios)}</span></div>
+          <div class="param-row"><span class="param-key">Vendas</span><span class="param-val">${fmtN(r.vendas_necessarias)}</span></div>
+        </div>
+        <div class="param-card">
+          <div class="param-card-title">📊 Targets</div>
+          <div class="param-row"><span class="param-key">CPL Alvo</span><span class="param-val" style="color:#3fb950">${fmtM(r.cpl_target)}</span></div>
+          <div class="param-row"><span class="param-key">CAC</span><span class="param-val">${fmtM(r.cac)}</span></div>
+          <div class="param-row"><span class="param-key">ROI Desejado</span><span class="param-val">${fmtP(r.roi_desejado)}</span></div>
+          <div class="param-row"><span class="param-key">Margem Bruta</span><span class="param-val">${fmtP(r.margem_bruta)}</span></div>
+          <div class="param-row"><span class="param-key">Ticket Médio</span><span class="param-val">${fmtM(r.ticket_medio)}</span></div>
+        </div>
+        <div class="param-card">
+          <div class="param-card-title">🔄 Taxas de Conversão</div>
+          <div class="param-row"><span class="param-key">Lead → MQL</span><span class="param-val">${fmtP(r.taxa_lead_mql)}</span></div>
+          <div class="param-row"><span class="param-key">MQL → SQL</span><span class="param-val">${fmtP(r.taxa_mql_sql)}</span></div>
+          <div class="param-row"><span class="param-key">SQL → Venda</span><span class="param-val">${fmtP(r.taxa_sql_venda)}</span></div>
+          <div class="param-row"><span class="param-key">Qtd. Compras/Cli.</span><span class="param-val">${r.qtd_compras!=null?r.qtd_compras:'—'}</span></div>
+        </div>
+      </div>
+    `;
+  }catch(err){
+    console.error('[AC Parâmetros]',err);
+    el.innerHTML=`<div class="error-box">⚠️ Erro ao carregar parâmetros: ${err.message}</div>`;
+  }
+}
+
+// ─── CLICKUP MAP MODAL ────────────────────────────────────────────────────────
+function openCuMapModal(dashName){
+  _cuMapCurrentClient=dashName;
+  document.getElementById('cu-map-dash-name').textContent=dashName;
+
+  const existing=clientMapping[dashName];
+  const curId=existing?.clickupFolderId||getClickupFolder(dashName)||'';
+
+  const sel=document.getElementById('cu-map-folder-select');
+  sel.innerHTML='<option value="">— sem vínculo —</option>'+
+    CU_FOLDERS.map(f=>`<option value="${f.id}"${f.id===curId?' selected':''}>${f.name}</option>`).join('');
+
+  document.getElementById('cu-map-overlay').classList.add('open');
+}
+
+function closeCuMapModal(){
+  document.getElementById('cu-map-overlay').classList.remove('open');
+  _cuMapCurrentClient=null;
+}
+
+async function saveCuMapping(){
+  if(!_cuMapCurrentClient) return;
+  const folderId=document.getElementById('cu-map-folder-select').value||null;
+  const existing=clientMapping[_cuMapCurrentClient]||{};
+
+  await sb.from('client_mapping').upsert(
+    {dashboard_name:_cuMapCurrentClient, clickup_folder_id:folderId, ac_company_name:existing.acName||null, updated_at:new Date().toISOString()},
+    {onConflict:'dashboard_name'}
+  );
+  clientMapping[_cuMapCurrentClient]={ acName:existing.acName||null, clickupFolderId:folderId };
+
+  closeCuMapModal();
+  // Re-render atividades if currently viewing that tab for this client
+  if(cpClient===_cuMapCurrentClient){
+    document.getElementById('cp-panel-atividades').innerHTML='';
+    if(cpActiveTab==='atividades') renderCpAtividades();
+    else setTimeout(renderCpAtividades,100);
+  }
 }
 
 setInterval(loadAll, 15*60*1000);
