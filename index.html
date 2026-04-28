@@ -1951,7 +1951,6 @@ function renderCpResultados(){
   const cplT=getCplTarget(cpClient);
 
   el.innerHTML=`
-    ${renderInsightsCard()}
     <div class="cp-charts">
       <div class="cp-chart-card">
         <h4>CPL ao longo do período</h4>
@@ -2048,7 +2047,8 @@ function renderCpCampanhas(){
 
   if(cpChannel==='meta'){
     el.innerHTML=`
-      <div style="display:flex;border-bottom:1px solid #21262d;margin:-22px -22px 18px;padding:0 22px;background:#161b22">
+      ${renderInsightsCard()}
+      <div style="display:flex;border-bottom:1px solid #21262d;margin:0 -22px 18px;padding:0 22px;background:#161b22">
         <div class="dtab active" id="cpct-0" onclick="cpCampTab(0,3)">📊 Campanhas</div>
         <div class="dtab" id="cpct-1" onclick="cpCampTab(1,3)">🎯 Conjuntos</div>
         <div class="dtab" id="cpct-2" onclick="cpCampTab(2,3)">🎨 Anúncios</div>
@@ -2059,7 +2059,8 @@ function renderCpCampanhas(){
     `;
   } else {
     el.innerHTML=`
-      <div style="display:flex;border-bottom:1px solid #21262d;margin:-22px -22px 18px;padding:0 22px;background:#161b22">
+      ${renderInsightsCard()}
+      <div style="display:flex;border-bottom:1px solid #21262d;margin:0 -22px 18px;padding:0 22px;background:#161b22">
         <div class="dtab active" id="cpct-0" onclick="cpCampTab(0,2)">📊 Campanhas</div>
         <div class="dtab" id="cpct-1" onclick="cpCampTab(1,2)">🔑 Grupos</div>
       </div>
