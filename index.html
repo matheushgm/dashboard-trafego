@@ -2110,18 +2110,19 @@ function closeCuMapModal(){
 
 async function saveCuMapping(){
   if(!_cuMapCurrentClient) return;
+  const dashName = _cuMapCurrentClient; // save before closeCuMapModal() nulls it
   const folderId=document.getElementById('cu-map-folder-select').value||null;
-  const existing=clientMapping[_cuMapCurrentClient]||{};
+  const existing=clientMapping[dashName]||{};
 
   await sb.from('client_mapping').upsert(
-    {dashboard_name:_cuMapCurrentClient, clickup_folder_id:folderId, ac_company_name:existing.acName||null, updated_at:new Date().toISOString()},
+    {dashboard_name:dashName, clickup_folder_id:folderId, ac_company_name:existing.acName||null, updated_at:new Date().toISOString()},
     {onConflict:'dashboard_name'}
   );
-  clientMapping[_cuMapCurrentClient]={ acName:existing.acName||null, clickupFolderId:folderId };
+  clientMapping[dashName]={ acName:existing.acName||null, clickupFolderId:folderId };
 
   closeCuMapModal();
-  // Re-render atividades if currently viewing that tab for this client
-  if(cpClient===_cuMapCurrentClient){
+  // Re-render atividades if this client is open on the client page
+  if(cpClient===dashName){
     document.getElementById('cp-panel-atividades').innerHTML='';
     if(cpActiveTab==='atividades') renderCpAtividades();
     else setTimeout(renderCpAtividades,100);
