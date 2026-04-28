@@ -1937,27 +1937,26 @@ function renderCpResultados(){
   // Destroy old charts
   ['_cpLine','_cpBar'].forEach(k=>{ if(cpCharts[k]){cpCharts[k].destroy();delete cpCharts[k];} });
 
-  // Build CPL time series (per-day)
-  const days=[], cpls=[];
+  // Build per-day time series (spend + conversions)
+  const days=[], spends=[], convs=[];
   for(let i=cpPeriod.span;i>=0;i--){
     const d=addDays(cpPeriod.p1e,-i);
     const dr=cpAllRows.filter(r=>fmtDate(r[CFG[cpChannel].dateKey])===d);
     const ds=dr.reduce((a,r)=>a+(cpChannel==='meta'?num(r['Valor investido']):num(r['Gasto'])),0);
     const dc=dr.reduce((a,r)=>a+CFG[cpChannel].convKeys.reduce((b,k)=>b+num(r[k]),0),0);
     days.push(fmtBR(d));
-    cpls.push(dc>0?parseFloat((ds/dc).toFixed(2)):null);
+    spends.push(parseFloat(ds.toFixed(2)));
+    convs.push(dc);
   }
-
-  const cplT=getCplTarget(cpClient);
 
   el.innerHTML=`
     <div class="cp-charts">
       <div class="cp-chart-card">
-        <h4>CPL ao longo do período</h4>
+        <h4>Investimento ao longo do período</h4>
         <div class="cp-chart-canvas"><canvas id="cp-chart-line"></canvas></div>
       </div>
       <div class="cp-chart-card">
-        <h4>Comparativo: atual vs anterior</h4>
+        <h4>Conversões ao longo do período</h4>
         <div class="cp-chart-canvas"><canvas id="cp-chart-bar"></canvas></div>
       </div>
     </div>
@@ -1984,55 +1983,45 @@ function renderCpResultados(){
     </table></div>
   `;
 
-  // Line chart — CPL evolution
+  // Line chart — Investimento ao longo do período
   const lineCtx=document.getElementById('cp-chart-line')?.getContext('2d');
   if(lineCtx){
-    const datasets=[{
-      label:'CPL (R$)',data:cpls,
-      borderColor:'#58a6ff',backgroundColor:'#58a6ff18',
-      tension:.35,fill:true,spanGaps:true,
-      pointRadius:2,pointHoverRadius:5,
-    }];
-    if(cplT) datasets.push({
-      label:`Alvo (${fmtMoney(cplT.value)})`,
-      data:days.map(()=>cplT.value),
-      borderColor:'#3fb950',borderDash:[5,4],
-      fill:false,pointRadius:0,tension:0,borderWidth:2,
-    });
     cpCharts['_cpLine']=new Chart(lineCtx,{
-      type:'line',data:{labels:days,datasets},
+      type:'line',
+      data:{labels:days,datasets:[{
+        label:'Investimento (R$)',data:spends,
+        borderColor:'#e3b341',backgroundColor:'#e3b34122',
+        tension:.35,fill:true,
+        pointRadius:2,pointHoverRadius:5,
+      }]},
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false}},
         scales:{
           x:{ticks:{color:'#484f58',font:{size:9},maxRotation:45},grid:{color:'#21262d'}},
-          y:{ticks:{color:'#484f58',font:{size:9},callback:v=>'R$'+v.toFixed(0)},grid:{color:'#21262d'}},
+          y:{ticks:{color:'#484f58',font:{size:9},callback:v=>'R$'+v.toFixed(0)},grid:{color:'#21262d'},beginAtZero:true},
         }
       }
     });
   }
 
-  // Bar chart — period comparison
+  // Line chart — Conversões ao longo do período
   const barCtx=document.getElementById('cp-chart-bar')?.getContext('2d');
   if(barCtx){
     cpCharts['_cpBar']=new Chart(barCtx,{
-      type:'bar',
-      data:{
-        labels:[cpPeriod.label1+' (atual)', cpPeriod.label2+' (ant.)'],
-        datasets:[
-          {label:'Conversões',data:[s.conv1,s.conv2],
-           backgroundColor:['#58a6ff99','#58a6ff44'],borderColor:['#58a6ff','#58a6ff88'],borderWidth:1},
-          {label:'Investimento (÷100)',data:[s.spend1/100,s.spend2/100],
-           backgroundColor:['#e3b34199','#e3b34144'],borderColor:['#e3b341','#e3b34188'],borderWidth:1,yAxisID:'y1'},
-        ]
-      },
+      type:'line',
+      data:{labels:days,datasets:[{
+        label:'Conversões',data:convs,
+        borderColor:'#58a6ff',backgroundColor:'#58a6ff22',
+        tension:.35,fill:true,
+        pointRadius:2,pointHoverRadius:5,
+      }]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}},
+        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false}},
         scales:{
-          x:{ticks:{color:'#484f58',font:{size:9}},grid:{color:'#21262d'}},
-          y:{ticks:{color:'#484f58',font:{size:9}},grid:{color:'#21262d'},title:{display:true,text:'Conv.',color:'#484f58',font:{size:9}}},
-          y1:{position:'right',ticks:{color:'#e3b341',font:{size:9},callback:v=>'R$'+(v*100).toFixed(0)},grid:{display:false},title:{display:true,text:'Invest.',color:'#e3b341',font:{size:9}}},
+          x:{ticks:{color:'#484f58',font:{size:9},maxRotation:45},grid:{color:'#21262d'}},
+          y:{ticks:{color:'#484f58',font:{size:9},precision:0},grid:{color:'#21262d'},beginAtZero:true},
         }
       }
     });
