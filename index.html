@@ -1937,16 +1937,28 @@ function renderCpResultados(){
   // Destroy old charts
   ['_cpLine','_cpBar'].forEach(k=>{ if(cpCharts[k]){cpCharts[k].destroy();delete cpCharts[k];} });
 
-  // Build per-day time series (spend + conversions)
-  const days=[], spends=[], convs=[];
+  // Build per-day time series for current AND previous period (day-index aligned)
+  const accountKey=CFG[cpChannel].accountKey, dateKey=CFG[cpChannel].dateKey;
+  const spendKey=cpChannel==='meta'?'Valor investido':'Gasto';
+  const prevRows=RAW[cpChannel].filter(r=>r[accountKey]?.trim()===cpClient&&inRange(fmtDate(r[dateKey]),cpPeriod.p2s,cpPeriod.p2e));
+  const sumDay=(rows,d)=>{
+    const dr=rows.filter(r=>fmtDate(r[dateKey])===d);
+    return{
+      spend:dr.reduce((a,r)=>a+num(r[spendKey]),0),
+      conv :dr.reduce((a,r)=>a+CFG[cpChannel].convKeys.reduce((b,k)=>b+num(r[k]),0),0),
+    };
+  };
+  const days=[], daysPrev=[], spends=[], convs=[], spendsPrev=[], convsPrev=[];
   for(let i=cpPeriod.span;i>=0;i--){
     const d=addDays(cpPeriod.p1e,-i);
-    const dr=cpAllRows.filter(r=>fmtDate(r[CFG[cpChannel].dateKey])===d);
-    const ds=dr.reduce((a,r)=>a+(cpChannel==='meta'?num(r['Valor investido']):num(r['Gasto'])),0);
-    const dc=dr.reduce((a,r)=>a+CFG[cpChannel].convKeys.reduce((b,k)=>b+num(r[k]),0),0);
-    days.push(fmtBR(d));
-    spends.push(parseFloat(ds.toFixed(2)));
-    convs.push(dc);
+    const dPrev=addDays(cpPeriod.p2e,-i);
+    const cur=sumDay(cpAllRows,d);
+    const prv=sumDay(prevRows,dPrev);
+    days.push(fmtBR(d)); daysPrev.push(fmtBR(dPrev));
+    spends.push(parseFloat(cur.spend.toFixed(2)));
+    convs.push(cur.conv);
+    spendsPrev.push(parseFloat(prv.spend.toFixed(2)));
+    convsPrev.push(prv.conv);
   }
 
   el.innerHTML=`
@@ -1983,20 +1995,28 @@ function renderCpResultados(){
     </table></div>
   `;
 
-  // Line chart — Investimento ao longo do período
+  // Tooltip helper: show both current and previous dates
+  const tooltipTitle=items=>{
+    const i=items[0]?.dataIndex; if(i==null)return'';
+    return `${days[i]} (atual) • ${daysPrev[i]} (ant.)`;
+  };
+
+  // Line chart — Investimento ao longo do período (com tendência do período anterior)
   const lineCtx=document.getElementById('cp-chart-line')?.getContext('2d');
   if(lineCtx){
     cpCharts['_cpLine']=new Chart(lineCtx,{
       type:'line',
-      data:{labels:days,datasets:[{
-        label:'Investimento (R$)',data:spends,
-        borderColor:'#e3b341',backgroundColor:'#e3b34122',
-        tension:.35,fill:true,
-        pointRadius:2,pointHoverRadius:5,
-      }]},
+      data:{labels:days,datasets:[
+        {label:'Atual (R$)',data:spends,
+         borderColor:'#e3b341',backgroundColor:'#e3b34122',
+         tension:.35,fill:true,pointRadius:2,pointHoverRadius:5,order:1},
+        {label:'Anterior (R$)',data:spendsPrev,
+         borderColor:'#8b949e',backgroundColor:'transparent',borderDash:[5,4],
+         tension:.35,fill:false,pointRadius:0,pointHoverRadius:4,borderWidth:1.5,order:2},
+      ]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false}},
+        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false,callbacks:{title:tooltipTitle}}},
         scales:{
           x:{ticks:{color:'#484f58',font:{size:9},maxRotation:45},grid:{color:'#21262d'}},
           y:{ticks:{color:'#484f58',font:{size:9},callback:v=>'R$'+v.toFixed(0)},grid:{color:'#21262d'},beginAtZero:true},
@@ -2005,20 +2025,22 @@ function renderCpResultados(){
     });
   }
 
-  // Line chart — Conversões ao longo do período
+  // Line chart — Conversões ao longo do período (com tendência do período anterior)
   const barCtx=document.getElementById('cp-chart-bar')?.getContext('2d');
   if(barCtx){
     cpCharts['_cpBar']=new Chart(barCtx,{
       type:'line',
-      data:{labels:days,datasets:[{
-        label:'Conversões',data:convs,
-        borderColor:'#58a6ff',backgroundColor:'#58a6ff22',
-        tension:.35,fill:true,
-        pointRadius:2,pointHoverRadius:5,
-      }]},
+      data:{labels:days,datasets:[
+        {label:'Atual',data:convs,
+         borderColor:'#58a6ff',backgroundColor:'#58a6ff22',
+         tension:.35,fill:true,pointRadius:2,pointHoverRadius:5,order:1},
+        {label:'Anterior',data:convsPrev,
+         borderColor:'#8b949e',backgroundColor:'transparent',borderDash:[5,4],
+         tension:.35,fill:false,pointRadius:0,pointHoverRadius:4,borderWidth:1.5,order:2},
+      ]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false}},
+        plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}},tooltip:{mode:'index',intersect:false,callbacks:{title:tooltipTitle}}},
         scales:{
           x:{ticks:{color:'#484f58',font:{size:9},maxRotation:45},grid:{color:'#21262d'}},
           y:{ticks:{color:'#484f58',font:{size:9},precision:0},grid:{color:'#21262d'},beginAtZero:true},
