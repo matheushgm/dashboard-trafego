@@ -444,6 +444,20 @@
     .ins-pri-high .ins-plan-pri{background:#2d2200;color:#e3b341;border:1px solid #e3b34166}
     .ins-pri-med .ins-plan-pri{background:#0c1a2e;color:#58a6ff;border:1px solid #58a6ff66}
     .ins-plan-action{color:#c9d1d9;flex:1}
+    /* ─── METRIC GROUPS (Custos / Engajamento / Performance) ────────────── */
+    .mg-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    @media(max-width:900px){.mg-grid{grid-template-columns:1fr}}
+    .mg-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px}
+    .mg-title{font-size:14px;font-weight:700;color:#c9d1d9;margin:0 0 12px;letter-spacing:.2px}
+    .mg-cost .mg-title{color:#e3b341}
+    .mg-eng .mg-title{color:#58a6ff}
+    .mg-perf .mg-title{color:#3fb950}
+    .mg-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+    .mg-tile{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 11px;min-width:0}
+    .mg-tile-label{font-size:10px;color:#8b949e;margin-bottom:4px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mg-tile-value{font-size:18px;font-weight:700;color:#c9d1d9;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mg-tile-var{font-size:11px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:3px}
+    .mg-tile-var .mg-arrow{font-size:9px}
   </style>
 </head>
 <body>
@@ -1929,6 +1943,93 @@ function renderInsightsCard(){
   </div>`;
 }
 
+// ─── METRIC GROUPS (Custos / Engajamento / Performance) ─────────────────────
+function aggClientMetrics(rows){
+  const isMeta=cpChannel==='meta';
+  if(isMeta){
+    const spend=rows.reduce((a,r)=>a+num(r['Valor investido']),0);
+    const impressions=rows.reduce((a,r)=>a+num(r['Impressões']),0);
+    const clicks=rows.reduce((a,r)=>a+num(r['Número de cliques no link']),0);
+    const conv=rows.reduce((a,r)=>a+CFG.meta.convKeys.reduce((b,k)=>b+num(r[k]),0),0);
+    // Frequência ponderada por impressões
+    const fRows=rows.filter(r=>num(r['Frequência'])>0&&num(r['Impressões'])>0);
+    const fImps=fRows.reduce((a,r)=>a+num(r['Impressões']),0);
+    const frequency=fImps>0?fRows.reduce((a,r)=>a+num(r['Frequência'])*num(r['Impressões']),0)/fImps:null;
+    return{
+      spend,impressions,clicks,conv,
+      cpm:impressions>0?(spend/impressions)*1000:null,
+      ctr:impressions>0?(clicks/impressions)*100:null,
+      cpl:conv>0?spend/conv:null,
+      convRate:clicks>0?(conv/clicks)*100:null,
+      frequency,
+    };
+  }
+  const spend=rows.reduce((a,r)=>a+num(r['Gasto']),0);
+  const clicks=rows.reduce((a,r)=>a+num(r['Cliques']),0);
+  const conv=rows.reduce((a,r)=>a+num(r['Conversões']),0);
+  const impressions=rows.reduce((a,r)=>a+(num(r['Impressões na parte superior'])||num(r['Impressões'])),0);
+  return{
+    spend,impressions,clicks,conv,
+    cpc:clicks>0?spend/clicks:null,
+    cpm:impressions>0?(spend/impressions)*1000:null,
+    ctr:impressions>0?(clicks/impressions)*100:null,
+    cpl:conv>0?spend/conv:null,
+    convRate:clicks>0?(conv/clicks)*100:null,
+  };
+}
+function pctVar(cur,prev){
+  if(cur==null&&prev==null)return null;
+  if(prev==null||prev===0) return (cur!=null&&cur>0)?100:null;
+  if(cur==null) return -100;
+  return ((cur-prev)/prev)*100;
+}
+function metricTile(label,value,variance,inverted){
+  const arrow=variance==null?'':variance>0.05?'▲':variance<-0.05?'▼':'•';
+  const cls=variance==null?'fl':varCls(variance,inverted);
+  const varTxt=variance==null?'—':fmtPct(variance);
+  return`<div class="mg-tile">
+    <div class="mg-tile-label">${label}</div>
+    <div class="mg-tile-value">${value}</div>
+    <div class="mg-tile-var ${cls}"><span class="mg-arrow">${arrow}</span>${varTxt}</div>
+  </div>`;
+}
+function renderMetricGroups(){
+  if(!cpAllRows.length||!cpPeriod)return'';
+  const isMeta=cpChannel==='meta';
+  const accountKey=CFG[cpChannel].accountKey, dateKey=CFG[cpChannel].dateKey;
+  const prevRows=RAW[cpChannel].filter(r=>r[accountKey]?.trim()===cpClient&&inRange(fmtDate(r[dateKey]),cpPeriod.p2s,cpPeriod.p2e));
+  const cur=aggClientMetrics(cpAllRows);
+  const prv=aggClientMetrics(prevRows);
+  const fmtInt=n=>n!=null?Math.round(n).toLocaleString('pt-BR'):'—';
+  const fmtPctVal=n=>n!=null?n.toFixed(1).replace('.',',')+'%':'—';
+  const fmtFreq=n=>n!=null?n.toFixed(2).replace('.',','):'—';
+
+  // Custos: lower is better → inverted=true
+  const custos=isMeta
+    ? metricTile('Gasto',fmtMoney(cur.spend),pctVar(cur.spend,prv.spend),false)
+      +metricTile('Frequência',fmtFreq(cur.frequency),pctVar(cur.frequency,prv.frequency),true)
+      +metricTile('CPM',fmtMoney(cur.cpm),pctVar(cur.cpm,prv.cpm),true)
+    : metricTile('Gasto',fmtMoney(cur.spend),pctVar(cur.spend,prv.spend),false)
+      +metricTile('CPC',fmtMoney(cur.cpc),pctVar(cur.cpc,prv.cpc),true)
+      +metricTile('CPM',fmtMoney(cur.cpm),pctVar(cur.cpm,prv.cpm),true);
+
+  // Engajamento: higher is better
+  const eng=metricTile('CTR',fmtPctVal(cur.ctr),pctVar(cur.ctr,prv.ctr),false)
+    +metricTile('Cliques',fmtInt(cur.clicks),pctVar(cur.clicks,prv.clicks),false)
+    +metricTile('Impressões',fmtInt(cur.impressions),pctVar(cur.impressions,prv.impressions),false);
+
+  // Performance: conversões/taxa higher is better; CPL lower is better
+  const perf=metricTile(isMeta?'Conversões':'Conversões',fmtInt(cur.conv),pctVar(cur.conv,prv.conv),false)
+    +metricTile(isMeta?'CPL':'CPA',fmtMoney(cur.cpl),pctVar(cur.cpl,prv.cpl),true)
+    +metricTile('Taxa de conv.',fmtPctVal(cur.convRate),pctVar(cur.convRate,prv.convRate),false);
+
+  return`<div class="mg-grid">
+    <div class="mg-card mg-cost"><h4 class="mg-title">Custos</h4><div class="mg-tiles">${custos}</div></div>
+    <div class="mg-card mg-eng"><h4 class="mg-title">Engajamento</h4><div class="mg-tiles">${eng}</div></div>
+    <div class="mg-card mg-perf"><h4 class="mg-title">Performance</h4><div class="mg-tiles">${perf}</div></div>
+  </div>`;
+}
+
 function renderCpResultados(){
   const el=document.getElementById('cp-panel-resultados');
   if(!cpStats||!cpPeriod){ el.innerHTML='<div class="empty">Sem dados no período.</div>'; return; }
@@ -1962,6 +2063,7 @@ function renderCpResultados(){
   }
 
   el.innerHTML=`
+    ${renderMetricGroups()}
     <div class="cp-charts">
       <div class="cp-chart-card">
         <h4>Investimento ao longo do período</h4>
