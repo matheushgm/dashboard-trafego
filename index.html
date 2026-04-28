@@ -1993,20 +1993,6 @@ async function renderCpAtividades(){
     const total =tasks.length;
     const pct   =total>0?Math.round(closed.length/total*100):0;
 
-    // 5. Sort open by due date asc (nulls last)
-    const openSorted=[...open].sort((a,b)=>{
-      if(!a.due_date&&!b.due_date)return 0;
-      if(!a.due_date)return 1;
-      if(!b.due_date)return-1;
-      return parseInt(a.due_date)-parseInt(b.due_date);
-    });
-    // 6. Recent closed (top 10 by date_closed desc)
-    const recentClosed=[...closed].sort((a,b)=>{
-      const ta=parseInt(a.date_closed||a.date_updated||0);
-      const tb=parseInt(b.date_closed||b.date_updated||0);
-      return tb-ta;
-    }).slice(0,10);
-
     const today=Date.now();
     const fmtDue=ts=>{
       if(!ts)return null;
@@ -2015,6 +2001,29 @@ async function renderCpAtividades(){
       const diff=Math.ceil((ms-today)/86400000);
       return{str:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}), overdue:diff<0, diff};
     };
+
+    // 5. Bucketize open tasks by due-date proximity
+    const buckets={atrasoMaisSemana:[],atrasoAteSemana:[],hoje:[],proximosSete:[],semData:[]};
+    open.forEach(t=>{
+      if(!t.due_date){buckets.semData.push(t);return;}
+      const diff=fmtDue(t.due_date).diff;
+      if(diff<-7)buckets.atrasoMaisSemana.push(t);
+      else if(diff<0)buckets.atrasoAteSemana.push(t);
+      else if(diff===0)buckets.hoje.push(t);
+      else buckets.proximosSete.push(t);
+    });
+    const sortByDue=(a,b)=>parseInt(a.due_date)-parseInt(b.due_date);
+    buckets.atrasoMaisSemana.sort(sortByDue);
+    buckets.atrasoAteSemana.sort(sortByDue);
+    buckets.hoje.sort(sortByDue);
+    buckets.proximosSete.sort(sortByDue);
+
+    // 6. Recent closed (top 10 by date_closed desc)
+    const recentClosed=[...closed].sort((a,b)=>{
+      const ta=parseInt(a.date_closed||a.date_updated||0);
+      const tb=parseInt(b.date_closed||b.date_updated||0);
+      return tb-ta;
+    }).slice(0,10);
 
     const taskHtml=t=>{
       const done=isClosed(t);
@@ -2038,8 +2047,15 @@ async function renderCpAtividades(){
       <div style="text-align:right;margin-bottom:8px">
         <button class="cu-link-btn" onclick="openCuMapModal('${safeName}')">🔗 Mudar pasta</button>
       </div>
-      ${openSorted.length
-        ?`<div class="cu-section-title">📋 Em aberto (${openSorted.length})</div>${openSorted.map(taskHtml).join('')}`
+      ${open.length
+        ?(()=>{
+          const renderBucket=(title,arr)=>arr.length?`<div class="cu-section-title">${title} (${arr.length})</div>${arr.map(taskHtml).join('')}`:'';
+          return renderBucket('🚨 Atraso de mais de 1 semana',buckets.atrasoMaisSemana)
+            +renderBucket('⚠️ Atraso de até 7 dias',buckets.atrasoAteSemana)
+            +renderBucket('📅 Hoje',buckets.hoje)
+            +renderBucket('🗓️ Vencimento nos próximos 7 dias',buckets.proximosSete)
+            +renderBucket('📌 Sem data definida',buckets.semData);
+        })()
         :'<div class="cu-section-title">📋 Em aberto</div><div class="cu-task"><span class="cu-check">🎉</span><div class="cu-task-name">Nenhuma tarefa em aberto!</div></div>'
       }
       ${recentClosed.length
