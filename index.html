@@ -1290,18 +1290,30 @@ function openDrawer(clientName, channel){
 function drillCampaign(name){
   drawerCampaignFilter = name;
   drawerAdsetFilter = null;
-  renderDrawerContent();
+  if(document.getElementById('client-page').classList.contains('open')){
+    renderCpCampDrill();
+  } else {
+    renderDrawerContent();
+  }
 }
 
 function drillAdset(name){
   drawerAdsetFilter = name;
-  renderDrawerContent();
+  if(document.getElementById('client-page').classList.contains('open')){
+    renderCpCampDrill();
+  } else {
+    renderDrawerContent();
+  }
 }
 
 function drawerNavTo(level){
   if(level===0){ drawerCampaignFilter=null; drawerAdsetFilter=null; }
   else if(level===1){ drawerAdsetFilter=null; }
-  renderDrawerContent();
+  if(document.getElementById('client-page').classList.contains('open')){
+    renderCpCampDrill();
+  } else {
+    renderDrawerContent();
+  }
 }
 
 function renderBreadcrumb(){
@@ -1721,6 +1733,8 @@ function openClientPage(clientName, channel){
 function closeClientPage(){
   Object.values(cpCharts).forEach(c=>{try{c.destroy();}catch(_){}});
   cpCharts={};
+  // Reset drill state so it doesn't bleed into the drawer next time
+  drawerCampaignFilter=null; drawerAdsetFilter=null;
   document.getElementById('client-page').classList.remove('open');
   document.body.style.overflow='';
   cpClient=null; cpChannel=null; cpStats=null; cpPeriod=null; cpAllRows=[];
@@ -1731,7 +1745,35 @@ function switchCpTab(tab){
   const keys=['resultados','campanhas','atividades','parametros'];
   document.querySelectorAll('.cptab').forEach((t,i)=>t.classList.toggle('active',keys[i]===tab));
   document.querySelectorAll('.cp-panel').forEach((el,i)=>el.classList.toggle('active',keys[i]===tab));
-  if(tab==='campanhas') renderCpCampanhas();
+  if(tab==='campanhas'){
+    // Always reset drill and re-render fresh when switching to Campanhas tab
+    drawerCampaignFilter=null; drawerAdsetFilter=null;
+    const el=document.getElementById('cp-panel-campanhas');
+    if(el) el.dataset.rendered='';
+    renderCpCampanhas();
+  }
+}
+
+// ─── DRILL WITHIN CLIENT PAGE ─────────────────────────────────────────────────
+// Renders drill-down content (campaign → adset → ads) inside the Campanhas panel
+// Uses cpAllRows (client page rows) NOT drawerAllRows
+function renderCpCampDrill(){
+  const el=document.getElementById('cp-panel-campanhas');
+  if(!el) return;
+
+  if(drawerAdsetFilter){
+    // Level 2: Ads filtered to this specific adset
+    const filtered=cpAllRows.filter(r=>r['Conjunto de Anúncio']===drawerAdsetFilter);
+    el.innerHTML=renderBreadcrumb()+renderMetaAds(filtered);
+  } else if(drawerCampaignFilter){
+    // Level 1: Adsets filtered to this specific campaign
+    const filtered=cpAllRows.filter(r=>r['Nome da campanha']===drawerCampaignFilter);
+    el.innerHTML=renderBreadcrumb()+renderMetaAdsets(filtered);
+  } else {
+    // Back to level 0: reset and show full campaign tabs
+    el.dataset.rendered='';
+    renderCpCampanhas();
+  }
 }
 
 // ─── KPI BAR ─────────────────────────────────────────────────────────────────
@@ -1866,7 +1908,7 @@ function renderCpResultados(){
 // ─── TAB: CAMPANHAS ──────────────────────────────────────────────────────────
 function renderCpCampanhas(){
   const el=document.getElementById('cp-panel-campanhas');
-  if(el.dataset.rendered==='1') return; // already rendered
+  if(el.dataset.rendered==='1') return; // skip if already rendered (cleared by drill/tab switch)
   if(!cpAllRows.length){ el.innerHTML='<div class="empty">Sem dados no período.</div>'; return; }
 
   if(cpChannel==='meta'){
