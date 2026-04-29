@@ -470,6 +470,8 @@
     body.is-shared .cptab[data-tab="parametros"]{display:none}
     body.is-shared #cp-panel-parametros{display:none!important}
     @media(max-width:680px){.cp-share-btn{font-size:11px;padding:5px 10px}.cp-share-btn .cp-share-label{display:none}}
+    /* ─── LOW CREATIVES WARN (Meta MOF+BOF < 5) ────────────────────────── */
+    .low-creatives-warn{display:inline-block;font-size:14px;cursor:help;line-height:1;vertical-align:middle;filter:drop-shadow(0 0 2px #e3b34155)}
   </style>
 </head>
 <body>
@@ -1020,6 +1022,15 @@ function destroyCharts(prefix){
   Object.keys(charts).filter(k=>k.startsWith(prefix)).forEach(k=>{charts[k].destroy();delete charts[k];});
 }
 
+// Classify Meta campaign by funnel stage based on naming convention
+function classifyFunnel(campaignName){
+  const norm=(campaignName||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  if(/(^|[^A-Z])(MEIO|MOF)([^A-Z]|$)/.test(norm))return 'meio';
+  if(/(^|[^A-Z])(FUNDO|BOFU|BOF)([^A-Z]|$)/.test(norm))return 'fundo';
+  if(/(^|[^A-Z])(TOPO|TOFU|TOF|RECONHECIMENTO|BRANDING)([^A-Z]|$)/.test(norm))return 'topo';
+  return 'outro';
+}
+
 function renderSection(rows,cfg,p,containerId,prefix,canal){
   let stats=buildStats(rows,cfg,p);
   if(searchTerm) stats=stats.filter(s=>s.name.toLowerCase().includes(searchTerm));
@@ -1033,6 +1044,31 @@ function renderSection(rows,cfg,p,containerId,prefix,canal){
 
   // ── Summary metrics from raw rows in period ──
   const periodRows=rows.filter(r=>{const d=fmtDate(r[cfg.dateKey]);return inRange(d,p.p1s,p.p1e);});
+
+  // ── Meta only: flag clients with <5 unique creatives in MOF + BOF campaigns ──
+  const lowCreativesMap={};
+  if(prefix==='meta'){
+    const byClient={};
+    periodRows.forEach(r=>{
+      const name=r['Nome da conta']?.trim();
+      const camp=r['Nome da campanha']||'';
+      const ad=r['Nome do Anúncio']||'';
+      if(!name||!ad)return;
+      const stage=classifyFunnel(camp);
+      if(stage!=='meio'&&stage!=='fundo')return;
+      if(!byClient[name])byClient[name]=new Set();
+      byClient[name].add(ad);
+    });
+    stats.forEach(s=>{
+      const count=byClient[s.name]?.size||0;
+      if(count<5) lowCreativesMap[s.name]=count;
+    });
+  }
+  const lowCreativesBadge=name=>{
+    if(!(name in lowCreativesMap))return'';
+    const c=lowCreativesMap[name];
+    return ` <span class="low-creatives-warn" title="Apenas ${c} criativo(s) ativo(s) em campanhas de meio/fundo de funil — recomendado ≥5">⚠️</span>`;
+  };
   let sumSpend=0,sumLeads=0,sumClicks=0,sumImpr=0,sumConv=0;
   if(prefix==='meta'){
     periodRows.forEach(r=>{
@@ -1115,7 +1151,7 @@ function renderSection(rows,cfg,p,containerId,prefix,canal){
     const trend=s.declining3d?`<span class="trend-dn">📉 Queda</span>`
       :s.trendDir==='up'?`<span class="trend-up">📈 Alta</span>`:`<span class="trend-fl">➡️ Estável</span>`;
     return`<tr>
-      <td><span class="client-link" onclick="openClientPage('${s.name.replace(/'/g,"\\'")}','${prefix}')">${s.name}</span></td>
+      <td><span class="client-link" onclick="openClientPage('${s.name.replace(/'/g,"\\'")}','${prefix}')">${s.name}</span>${lowCreativesBadge(s.name)}</td>
       <td><span class="pill ${pillCls(s.status)}">${pillIco(s.status)} ${s.status}</span></td>
       <td>${squadCell(s.name)}</td>
       <td>${fmtNum(s.conv1)}</td><td>${fmtNum(s.conv2)}</td>
@@ -1137,7 +1173,7 @@ function renderSection(rows,cfg,p,containerId,prefix,canal){
       <div class="mcl-left">
         <span class="pill ${pillCls(s.status)}" style="flex-shrink:0">${pillIco(s.status)}</span>
         <div style="min-width:0;flex:1">
-          <div class="mcl-name">${s.name}</div>
+          <div class="mcl-name">${s.name}${lowCreativesBadge(s.name)}</div>
           <select class="squad-sel-sm" onclick="event.stopPropagation()" onchange="setSquad('${s.name.replace(/'/g,"\\'")}',this.value)">
             <option value="" ${!squads[s.name]?'selected':''}>sem squad</option>
             <option value="Caça ROI" ${squads[s.name]==='Caça ROI'?'selected':''}>🎯 Caça ROI</option>
