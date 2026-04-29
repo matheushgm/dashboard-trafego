@@ -458,6 +458,18 @@
     .mg-tile-value{font-size:18px;font-weight:700;color:#c9d1d9;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .mg-tile-var{font-size:11px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:3px}
     .mg-tile-var .mg-arrow{font-size:9px}
+    /* ─── SHARE BUTTON & SHARED MODE ────────────────────────────────────── */
+    .cp-share-btn{background:#1f6feb;border:1px solid #388bfd66;color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+    .cp-share-btn:hover{background:#388bfd;border-color:#58a6ff}
+    .cp-share-btn:active{transform:scale(.97)}
+    #share-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#161b22;color:#c9d1d9;border:1px solid #30363d;padding:10px 16px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s}
+    #share-toast.visible{opacity:1}
+    body.is-shared #app{display:none!important}
+    body.is-shared .cp-back{display:none}
+    body.is-shared .cp-share-btn{display:none}
+    body.is-shared .cptab[data-tab="parametros"]{display:none}
+    body.is-shared #cp-panel-parametros{display:none!important}
+    @media(max-width:680px){.cp-share-btn{font-size:11px;padding:5px 10px}.cp-share-btn .cp-share-label{display:none}}
   </style>
 </head>
 <body>
@@ -579,13 +591,14 @@
     <button class="cp-back" onclick="closeClientPage()">← Voltar</button>
     <div class="cp-client-name" id="cp-client-name">—</div>
     <div class="cp-badges" id="cp-badges"></div>
+    <button class="cp-share-btn" id="cp-share-btn" onclick="copyShareableLink()" title="Copiar link do cliente para compartilhar">🔗 Link Compartilhável</button>
   </div>
   <div class="cp-kpi-bar" id="cp-kpi-bar"></div>
   <div class="cp-tabs" id="cp-tabs">
-    <div class="cptab active" onclick="switchCpTab('resultados')">📊 Resultados</div>
-    <div class="cptab" onclick="switchCpTab('campanhas')">📋 Campanhas</div>
-    <div class="cptab" onclick="switchCpTab('atividades')">✅ Atividades</div>
-    <div class="cptab" onclick="switchCpTab('parametros')">⚙️ Parâmetros</div>
+    <div class="cptab active" data-tab="resultados" onclick="switchCpTab('resultados')">📊 Resultados</div>
+    <div class="cptab" data-tab="campanhas" onclick="switchCpTab('campanhas')">📋 Campanhas</div>
+    <div class="cptab" data-tab="atividades" onclick="switchCpTab('atividades')">✅ Atividades</div>
+    <div class="cptab" data-tab="parametros" onclick="switchCpTab('parametros')">⚙️ Parâmetros</div>
   </div>
   <div class="cp-body">
     <div class="cp-panel active" id="cp-panel-resultados"></div>
@@ -1240,6 +1253,37 @@ function applyFilter(customFrom, customTo){
 }
 
 // ─── LOAD ─────────────────────────────────────────────────────────────────────
+// ─── SHAREABLE LINK ─────────────────────────────────────────────────────────
+function showToast(msg){
+  let t=document.getElementById('share-toast');
+  if(!t){t=document.createElement('div');t.id='share-toast';document.body.appendChild(t);}
+  t.textContent=msg;
+  t.classList.add('visible');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('visible'),2400);
+}
+function copyShareableLink(){
+  if(!cpClient||!cpChannel){showToast('⚠️ Abra um cliente primeiro');return;}
+  const url=`${location.origin}${location.pathname}?cliente=${encodeURIComponent(cpClient)}&canal=${cpChannel}&shared=1`;
+  const done=()=>showToast('🔗 Link copiado: '+url.length+' chars');
+  if(navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(url).then(done).catch(()=>prompt('Copie o link manualmente:',url));
+  } else {
+    prompt('Copie o link manualmente:',url);
+  }
+}
+function applySharedModeIfRequested(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('shared')!=='1')return false;
+  const cliente=params.get('cliente');
+  const canal=params.get('canal');
+  if(!cliente||!canal||!RAW[canal]?.length)return false;
+  document.body.classList.add('is-shared');
+  // Auto-open the client view
+  openClientPage(cliente, canal);
+  return true;
+}
+
 async function loadAll(){
   try{
     const[metaText,googleText]=await Promise.all([
@@ -1261,6 +1305,8 @@ async function loadAll(){
   }
   document.getElementById('loader').style.display='none';
   document.getElementById('app').style.display='block';
+  // Shared link mode: auto-open client and hide global UI
+  applySharedModeIfRequested();
 }
 
 async function refresh(){
@@ -1772,6 +1818,8 @@ function openClientPage(clientName, channel){
 }
 
 function closeClientPage(){
+  // In shared mode, the client view is the only view — don't allow closing
+  if(document.body.classList.contains('is-shared')) return;
   Object.values(cpCharts).forEach(c=>{try{c.destroy();}catch(_){}});
   cpCharts={};
   // Reset drill state so it doesn't bleed into the drawer next time
