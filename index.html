@@ -472,11 +472,80 @@
     @media(max-width:680px){.cp-share-btn{font-size:11px;padding:5px 10px}.cp-share-btn .cp-share-label{display:none}}
     /* ─── LOW CREATIVES WARN (Meta MOF+BOF < 5) ────────────────────────── */
     .low-creatives-warn{display:inline-block;font-size:14px;cursor:help;line-height:1;vertical-align:middle;filter:drop-shadow(0 0 2px #e3b34155)}
+    /* ─── AUTH OVERLAY + USERS MODAL ───────────────────────────────────── */
+    #auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
+    #auth-overlay.hidden{display:none}
+    .auth-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+    .auth-card h2{margin:0 0 6px;color:#fff;font-size:20px}
+    .auth-card .auth-sub{color:#8b949e;font-size:12px;margin:0 0 22px}
+    .auth-field{margin-bottom:14px}
+    .auth-field label{display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+    .auth-field input{width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px 12px;font-size:13px;color:#c9d1d9;outline:none;transition:border-color .15s}
+    .auth-field input:focus{border-color:#58a6ff}
+    .auth-submit{width:100%;background:#1f6feb;border:1px solid #388bfd66;color:#fff;padding:11px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;margin-top:6px}
+    .auth-submit:hover{background:#388bfd;border-color:#58a6ff}
+    .auth-submit:disabled{opacity:.55;cursor:not-allowed}
+    .auth-error{background:#2d1515;border:1px solid #f8514466;color:#f85149;padding:9px 11px;border-radius:6px;font-size:12px;margin-bottom:12px;display:none}
+    .auth-error.visible{display:block}
+    .auth-logo{text-align:center;margin-bottom:18px;font-size:36px}
+    .header-user{display:flex;align-items:center;gap:8px;margin-left:8px}
+    .header-user-email{font-size:11px;color:#8b949e;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn-users{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+    .btn-users:hover{background:#30363d;color:#fff;border-color:#58a6ff}
+    .btn-logout{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+    .btn-logout:hover{background:#2d1515;color:#f85149;border-color:#f8514466}
+    /* Users modal */
+    #users-overlay{position:fixed;inset:0;background:#0009;z-index:920;display:none;align-items:center;justify-content:center;padding:16px}
+    #users-overlay.open{display:flex}
+    #users-modal{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:0;width:100%;max-width:780px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+    .users-modal-header{padding:18px 22px;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;align-items:center}
+    .users-modal-header h3{margin:0;color:#fff;font-size:15px}
+    .users-modal-close{background:transparent;border:none;color:#8b949e;cursor:pointer;font-size:20px;padding:0 4px}
+    .users-modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+    .users-add-form{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px;margin-bottom:18px;display:grid;grid-template-columns:2fr 1.5fr 1fr auto;gap:8px;align-items:end}
+    @media(max-width:680px){.users-add-form{grid-template-columns:1fr}}
+    .users-add-form label{font-size:10px;color:#8b949e;display:block;margin-bottom:4px;letter-spacing:.3px;text-transform:uppercase}
+    .users-add-form input,.users-add-form select{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 10px;font-size:12px;color:#c9d1d9;outline:none;width:100%}
+    .users-add-form input:focus,.users-add-form select:focus{border-color:#58a6ff}
+    .users-add-btn{background:#3fb950;border:1px solid #3fb95066;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+    .users-add-btn:hover{background:#56d46a}
+    .users-add-btn:disabled{opacity:.55;cursor:not-allowed}
+    .users-table{width:100%;border-collapse:collapse;font-size:12px}
+    .users-table th{text-align:left;padding:8px 10px;color:#8b949e;font-weight:600;border-bottom:1px solid #21262d;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+    .users-table td{padding:9px 10px;border-bottom:1px solid #21262d;color:#c9d1d9}
+    .users-table tr:last-child td{border-bottom:none}
+    .role-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px}
+    .role-admin{background:#1f3858;color:#58a6ff;border:1px solid #58a6ff44}
+    .role-user{background:#161b22;color:#8b949e;border:1px solid #30363d}
+    .users-action-btn{background:transparent;border:1px solid #30363d;color:#8b949e;padding:4px 9px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:all .12s;margin-right:4px}
+    .users-action-btn:hover{background:#30363d;color:#fff}
+    .users-action-btn.danger:hover{background:#2d1515;color:#f85149;border-color:#f8514466}
   </style>
 </head>
 <body>
 
-<div id="loader"><div class="spinner"></div><p>Carregando dados das planilhas…</p></div>
+<!-- AUTH OVERLAY (login screen) -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">📊</div>
+    <h2>Dashboard Revenue Lab</h2>
+    <p class="auth-sub">Faça login para acessar a plataforma</p>
+    <div class="auth-error" id="auth-error"></div>
+    <form id="auth-form" onsubmit="return doLogin(event)">
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="auth-email" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <input type="password" id="auth-password" autocomplete="current-password" required>
+      </div>
+      <button class="auth-submit" id="auth-submit-btn" type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div id="loader" style="display:none"><div class="spinner"></div><p>Carregando dados das planilhas…</p></div>
 
 <div id="app" style="display:none">
   <div class="header">
@@ -487,6 +556,11 @@
     <div class="header-right">
       <div class="update-info">Última atualização<span id="last-update">—</span></div>
       <button class="btn" id="btn-refresh" onclick="refresh()">⟳ Atualizar</button>
+      <div class="header-user">
+        <span class="header-user-email" id="header-user-email"></span>
+        <button class="btn-users" id="btn-users" onclick="openUsersModal()" style="display:none">👤 Usuários</button>
+        <button class="btn-logout" onclick="doLogout()">Sair</button>
+      </div>
     </div>
   </div>
 
@@ -632,6 +706,37 @@
     <div class="map-footer">
       <button class="btn" onclick="closeCuMapModal()">Cancelar</button>
       <button class="btn" style="background:#1f3858;border-color:#388bfd55;color:#58a6ff" onclick="saveCuMapping()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- USERS MODAL (admin only) -->
+<div id="users-overlay" onclick="closeUsersModal()">
+  <div id="users-modal" onclick="event.stopPropagation()">
+    <div class="users-modal-header">
+      <h3>👤 Gerenciar Usuários</h3>
+      <button class="users-modal-close" onclick="closeUsersModal()">×</button>
+    </div>
+    <div class="users-modal-body">
+      <form class="users-add-form" onsubmit="return adminCreateUser(event)">
+        <div>
+          <label>E-mail</label>
+          <input type="email" id="new-user-email" required>
+        </div>
+        <div>
+          <label>Senha (mín. 6)</label>
+          <input type="password" id="new-user-password" minlength="6" required>
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="new-user-role">
+            <option value="user">Usuário</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button class="users-add-btn" type="submit">+ Criar</button>
+      </form>
+      <div id="users-list">Carregando…</div>
     </div>
   </div>
 </div>
@@ -2520,8 +2625,173 @@ async function saveCuMapping(){
   }
 }
 
-setInterval(loadAll, 15*60*1000);
-loadAll();
+// ─── AUTH ───────────────────────────────────────────────────────────────────
+let currentUser = null;       // { id, email }
+let currentProfile = null;    // { id, email, role }
+let _refreshInterval = null;
+
+function showAuthError(msg){
+  const el=document.getElementById('auth-error');
+  el.textContent=msg;
+  el.classList.add('visible');
+}
+function clearAuthError(){
+  document.getElementById('auth-error').classList.remove('visible');
+}
+
+async function doLogin(ev){
+  ev.preventDefault();
+  clearAuthError();
+  const email=document.getElementById('auth-email').value.trim();
+  const pw=document.getElementById('auth-password').value;
+  const btn=document.getElementById('auth-submit-btn');
+  btn.disabled=true; btn.textContent='Entrando…';
+  try{
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
+    if(error){showAuthError(error.message==='Invalid login credentials'?'E-mail ou senha incorretos.':error.message);return false;}
+    if(data?.session) await onAuthenticated(data.session);
+  } catch(e){
+    showAuthError('Erro: '+e.message);
+  } finally {
+    btn.disabled=false; btn.textContent='Entrar';
+  }
+  return false;
+}
+
+async function doLogout(){
+  if(_refreshInterval){clearInterval(_refreshInterval);_refreshInterval=null;}
+  await sb.auth.signOut();
+  currentUser=null; currentProfile=null;
+  // Strip the shared mode if present so reload shows login
+  if(location.search) history.replaceState(null,'',location.pathname);
+  location.reload();
+}
+
+async function onAuthenticated(session){
+  currentUser=session.user;
+  // Load profile (role)
+  const{data:prof,error}=await sb.from('profiles').select('id,email,role').eq('id',currentUser.id).maybeSingle();
+  if(error||!prof){
+    showAuthError('Não foi possível carregar seu perfil.');
+    await sb.auth.signOut();
+    return;
+  }
+  currentProfile=prof;
+  // Hide auth overlay, show app
+  document.getElementById('auth-overlay').classList.add('hidden');
+  document.getElementById('loader').style.display='block';
+  // Update header
+  document.getElementById('header-user-email').textContent=prof.email;
+  if(prof.role==='admin') document.getElementById('btn-users').style.display='inline-block';
+  // Now boot the dashboard
+  await loadAll();
+  if(!_refreshInterval) _refreshInterval=setInterval(loadAll,15*60*1000);
+}
+
+async function bootAuth(){
+  // Check existing session
+  const{data:{session}}=await sb.auth.getSession();
+  if(session) {
+    await onAuthenticated(session);
+  } else {
+    // Show login form
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    document.getElementById('loader').style.display='none';
+  }
+  // Listen for changes (other tabs, token refresh)
+  sb.auth.onAuthStateChange((evt,sess)=>{
+    if(evt==='SIGNED_OUT'){
+      if(_refreshInterval){clearInterval(_refreshInterval);_refreshInterval=null;}
+      location.reload();
+    }
+  });
+}
+
+// ─── ADMIN USERS PANEL ──────────────────────────────────────────────────────
+async function openUsersModal(){
+  document.getElementById('users-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  await refreshUsersList();
+}
+function closeUsersModal(){
+  document.getElementById('users-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+async function refreshUsersList(){
+  const el=document.getElementById('users-list');
+  el.innerHTML='<div style="color:#8b949e;padding:14px 0">Carregando…</div>';
+  const{data,error}=await sb.rpc('admin_list_users');
+  if(error){el.innerHTML=`<div class="error-box">⚠️ ${error.message}</div>`;return;}
+  if(!data?.length){el.innerHTML='<div style="color:#8b949e">Nenhum usuário.</div>';return;}
+  const fmtBR=ts=>ts?new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+  el.innerHTML=`<table class="users-table">
+    <thead><tr><th>E-mail</th><th>Tipo</th><th>Criado</th><th>Último login</th><th>Ações</th></tr></thead>
+    <tbody>${data.map(u=>{
+      const isMe=u.id===currentUser.id;
+      const isAdmin=u.role==='admin';
+      return`<tr>
+        <td>${u.email}${isMe?' <span style="color:#8b949e;font-size:10px">(você)</span>':''}</td>
+        <td><span class="role-pill ${isAdmin?'role-admin':'role-user'}">${isAdmin?'ADMIN':'USER'}</span></td>
+        <td style="color:#8b949e;font-size:11px">${fmtBR(u.created_at)}</td>
+        <td style="color:#8b949e;font-size:11px">${fmtBR(u.last_sign_in_at)}</td>
+        <td>
+          <button class="users-action-btn" onclick="adminToggleRole('${u.id}','${u.role}',${isMe})">${isAdmin?'↓ User':'↑ Admin'}</button>
+          <button class="users-action-btn" onclick="adminResetPassword('${u.id}','${u.email.replace(/'/g,"\\'")}')">🔑 Senha</button>
+          ${isMe?'':`<button class="users-action-btn danger" onclick="adminDeleteUser('${u.id}','${u.email.replace(/'/g,"\\'")}')">🗑️ Excluir</button>`}
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function adminCreateUser(ev){
+  ev.preventDefault();
+  const email=document.getElementById('new-user-email').value.trim();
+  const password=document.getElementById('new-user-password').value;
+  const role=document.getElementById('new-user-role').value;
+  const{error}=await sb.rpc('admin_create_user',{p_email:email,p_password:password,p_role:role});
+  if(error){
+    const map={email_exists:'E-mail já cadastrado.',invalid_email:'E-mail inválido.',password_too_short:'Senha precisa ter pelo menos 6 caracteres.',permission_denied:'Sem permissão.',invalid_role:'Tipo inválido.'};
+    showToast('⚠️ '+(map[error.message]||error.message));
+    return false;
+  }
+  showToast('✅ Usuário '+email+' criado');
+  document.getElementById('new-user-email').value='';
+  document.getElementById('new-user-password').value='';
+  document.getElementById('new-user-role').value='user';
+  await refreshUsersList();
+  return false;
+}
+
+async function adminToggleRole(userId, currentRole, isMe){
+  if(isMe&&currentRole==='admin'){if(!confirm('Tem certeza que quer remover seu próprio admin? Você perderá acesso ao painel de usuários.'))return;}
+  const newRole=currentRole==='admin'?'user':'admin';
+  const{error}=await sb.rpc('admin_update_role',{p_user_id:userId,p_role:newRole});
+  if(error){showToast('⚠️ '+(error.message==='cannot_demote_self'?'Não é possível remover seu próprio admin':error.message));return;}
+  showToast('✅ Tipo atualizado para '+newRole);
+  await refreshUsersList();
+  if(isMe&&newRole==='user') document.getElementById('btn-users').style.display='none';
+}
+
+async function adminDeleteUser(userId, email){
+  if(!confirm(`Excluir o usuário "${email}"? Esta ação não pode ser desfeita.`))return;
+  const{error}=await sb.rpc('admin_delete_user',{p_user_id:userId});
+  if(error){showToast('⚠️ '+error.message);return;}
+  showToast('✅ Usuário excluído');
+  await refreshUsersList();
+}
+
+async function adminResetPassword(userId, email){
+  const newPw=prompt(`Nova senha para "${email}" (mín. 6 caracteres):`);
+  if(!newPw)return;
+  if(newPw.length<6){showToast('⚠️ Senha muito curta');return;}
+  const{error}=await sb.rpc('admin_reset_password',{p_user_id:userId,p_new_password:newPw});
+  if(error){showToast('⚠️ '+error.message);return;}
+  showToast('✅ Senha redefinida');
+}
+
+bootAuth();
 </script>
 </body>
 </html>
