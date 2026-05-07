@@ -1186,7 +1186,7 @@ function renderSection(rows,cfg,p,containerId,prefix,canal){
     periodRows.forEach(r=>{
       sumSpend+=num(r['Gasto']);
       sumConv +=num(r['Conversões']);
-      sumClicks+=num(r['Cliques']);
+      sumClicks+=(num(r['CLiques'])||num(r['Cliques']));
       sumImpr  +=num(r['Impressões na parte superior'])||num(r['Impressões']);
     });
     sumLeads=sumConv;
@@ -1838,7 +1838,7 @@ function renderGoogleCampaigns(rows){
   const groups=groupBy(rows,
     r=>r['Campanha'],
     {spend:r=>num(r['Gasto']),conv:r=>num(r['Conversões']),
-     clicks:r=>num(r['Cliques']),impressions:r=>num(r['Impressões na parte superior']),
+     clicks:r=>(num(r['CLiques'])||num(r['Cliques'])),impressions:r=>num(r['Impressões na parte superior']),
      budgetLoss:r=>num(r['% de perda por orçamento'])});
   if(!groups.length) return'<div class="empty">Sem campanhas no período.</div>';
 
@@ -1871,7 +1871,7 @@ function _rows_count(g){ return g._rows.length||1; }
 function renderGoogleGroups(rows){
   const groups=groupBy(rows,
     r=>r['Grupo de palavras']||r['Grupo de palavras-chave'],
-    {spend:r=>num(r['Gasto']),conv:r=>num(r['Conversões']),clicks:r=>num(r['Cliques'])});
+    {spend:r=>num(r['Gasto']),conv:r=>num(r['Conversões']),clicks:r=>(num(r['CLiques'])||num(r['Cliques']))});
   if(!groups.length) return'<div class="empty">Sem grupos de palavras no período.</div>';
 
   return`<div class="dt-wrap"><table>
@@ -2034,7 +2034,7 @@ function buildClientInsights(){
   const groups=groupBy(cpAllRows, r=>r[adNameKey], {
     spend:r=>isMeta?num(r['Valor investido']):num(r['Gasto']),
     conv:r=>isMeta?(num(r['Número de conversas iniciadas no Whatsapp'])+num(r['Leads'])+num(r['Número de vendas'])):num(r['Conversões']),
-    clicks:r=>isMeta?num(r['Número de cliques no link']):num(r['Cliques']),
+    clicks:r=>isMeta?num(r['Número de cliques no link']):(num(r['CLiques'])||num(r['Cliques'])),
     impressions:r=>isMeta?num(r['Impressões']):num(r['Impressões na parte superior']),
   });
   const wasters=groups.filter(g=>{
@@ -2154,7 +2154,7 @@ function aggClientMetrics(rows){
     };
   }
   const spend=rows.reduce((a,r)=>a+num(r['Gasto']),0);
-  const clicks=rows.reduce((a,r)=>a+num(r['Cliques']),0);
+  const clicks=rows.reduce((a,r)=>a+(num(r['CLiques'])||num(r['Cliques'])),0);
   const conv=rows.reduce((a,r)=>a+num(r['Conversões']),0);
   const impressions=rows.reduce((a,r)=>a+(num(r['Impressões na parte superior'])||num(r['Impressões'])),0);
   return{
