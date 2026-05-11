@@ -1559,7 +1559,8 @@ function buildWeeklyMessage(){
     return `${fmtMoney(p)} → ${fmtMoney(c)} (${fmtPctDiff(c, p)})`;
   };
 
-  const msg = `Bom dia! Segue os dados dos últimos 7 dias (${fmtBR(p1s)} – ${fmtBR(p1e)}):
+  const canalLabel = cpChannel === 'meta' ? 'Meta Ads' : 'Google Ads';
+  const msg = `Bom dia! Segue os dados dos últimos 7 dias de ${canalLabel} (${fmtBR(p1s)} – ${fmtBR(p1e)}):
 
 • Valor investido: ${fmtMoney(cur.spend)}
 • Conversões: ${fmtNum(cur.conv)}
