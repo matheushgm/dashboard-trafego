@@ -1434,6 +1434,63 @@ function showToast(msg){
   t._timer=setTimeout(()=>t.classList.remove('visible'),2400);
 }
 // ─── WEEKLY MESSAGE GENERATOR ───────────────────────────────────────────────
+// Build per-campaign client-facing recommendations:
+//  - CTR < 1% (Meta) / < 5% (Google) → testar mais criativos
+//  - Taxa de conversão < 10% (Meta) / < 5% (Google) → testar landing page
+//  - Prioriza campanhas de fundo > meio > topo (Meta) e por gasto desc
+function buildClientFacingSteps(rows, channel){
+  const isMeta = channel === 'meta';
+  const campKey = isMeta ? 'Nome da campanha' : 'Campanha';
+  const groups = groupBy(rows, r => r[campKey], {
+    spend: r => isMeta ? num(r['Valor investido']) : num(r['Gasto']),
+    conv: r => isMeta
+      ? num(r['Número de conversas iniciadas no Whatsapp']) + num(r['Leads']) + num(r['Número de vendas'])
+      : num(r['Conversões']),
+    clicks: r => isMeta ? num(r['Número de cliques no link']) : (num(r['CLiques']) || num(r['Cliques'])),
+    impressions: r => isMeta ? num(r['Impressões']) : (num(r['Impressões na parte superior']) || num(r['Impressões'])),
+  });
+
+  const ctrThreshold  = isMeta ? 1 : 5;
+  const convThreshold = isMeta ? 10 : 5;
+  const minSpend      = 50;
+  const minClicks     = 30;
+  const stagePri      = { fundo:0, meio:1, topo:2, outro:3 };
+
+  const lowCtr = [];
+  const lowConv = [];
+
+  groups.forEach(g => {
+    if (g.spend < minSpend) return;
+    const stage = isMeta ? classifyFunnel(g.key) : 'outro';
+    const ctr      = g.impressions > 0 ? (g.clicks / g.impressions) * 100 : null;
+    const convRate = g.clicks > 0      ? (g.conv   / g.clicks)      * 100 : null;
+    if (ctr != null && ctr < ctrThreshold) {
+      lowCtr.push({ key: g.key, ctr, spend: g.spend, stage });
+    }
+    if (convRate != null && g.clicks >= minClicks && convRate < convThreshold) {
+      lowConv.push({ key: g.key, convRate, clicks: g.clicks, stage });
+    }
+  });
+
+  const sortByStage = (a, b) => (stagePri[a.stage] - stagePri[b.stage]) || (b.spend - a.spend);
+  lowCtr.sort(sortByStage);
+  lowConv.sort(sortByStage);
+
+  const steps = [];
+  // Max 3 of each kind to keep message tight
+  lowCtr.slice(0, 3).forEach(c => {
+    steps.push(`Precisamos testar mais criativos na campanha "${c.key}" — CTR está em ${c.ctr.toFixed(2).replace('.', ',')}% (alvo ≥ ${ctrThreshold}%).`);
+  });
+  lowConv.slice(0, 3).forEach(c => {
+    steps.push(`Precisamos testar a landing page da campanha "${c.key}" — taxa de conversão está em ${c.convRate.toFixed(1).replace('.', ',')}% (alvo ≥ ${convThreshold}%).`);
+  });
+
+  if (!steps.length) {
+    steps.push('Performance dentro do esperado — manter cadência e seguir monitorando.');
+  }
+  return steps;
+}
+
 function buildWeeklyMessage(){
   if(!cpClient||!cpChannel||!RAW[cpChannel]?.length)return null;
   const dateKey=CFG[cpChannel].dateKey, accountKey=CFG[cpChannel].accountKey;
@@ -1470,19 +1527,10 @@ function buildWeeklyMessage(){
     return `${sign}${pct.toFixed(1).replace('.',',')}%`;
   };
 
-  // Get AI insights for the last-7-days window (temporarily swap globals)
-  const _row=cpAllRows,_per=cpPeriod,_st=cpStats;
-  const p7=buildPeriod(p1s,p1e);
-  cpPeriod=p7;
-  cpAllRows=clientRows.filter(r=>inRange(fmtDate(r[dateKey]),p1s,p1e));
-  cpStats=buildStats(RAW[cpChannel],CFG[cpChannel],p7).find(s=>s.name===cpClient)||null;
-  const ins=buildClientInsights();
-  // restore
-  cpAllRows=_row; cpPeriod=_per; cpStats=_st;
-
-  const proximos = ins?.plan?.length
-    ? ins.plan.map(p=>`   • ${p.level}: ${p.action}`).join('\n')
-    : '   • Performance estável — manter monitoramento e testar novos criativos';
+  // Build client-facing recommendations from per-campaign data of the 7d window
+  const lastWeekRows = clientRows.filter(r => inRange(fmtDate(r[dateKey]), p1s, p1e));
+  const steps = buildClientFacingSteps(lastWeekRows, cpChannel);
+  const proximos = steps.map(s => `• ${s}`).join('\n');
 
   const msg = `Bom dia! Segue os dados dos últimos 7 dias (${fmtBR(p1s)} – ${fmtBR(p1e)}):
 
