@@ -531,6 +531,20 @@
     .users-action-btn{background:transparent;border:1px solid #30363d;color:#8b949e;padding:4px 9px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:all .12s;margin-right:4px}
     .users-action-btn:hover{background:#30363d;color:#fff}
     .users-action-btn.danger:hover{background:#2d1515;color:#f85149;border-color:#f8514466}
+    /* Password visibility toggle */
+    .pwd-wrap{position:relative}
+    .pwd-wrap input{padding-right:32px!important}
+    .pwd-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:#8b949e;cursor:pointer;font-size:13px;padding:4px 6px;line-height:1;border-radius:4px;transition:all .12s}
+    .pwd-eye:hover{background:#30363d;color:#c9d1d9}
+    /* Status pills */
+    .status-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px}
+    .status-active{background:#0d2118;color:#3fb950;border:1px solid #3fb95044}
+    .status-disabled{background:#2d1515;color:#f85149;border:1px solid #f8514444}
+    /* Activity dot */
+    .activity-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
+    .activity-recent{background:#3fb950;box-shadow:0 0 4px #3fb95088}
+    .activity-week{background:#e3b341}
+    .activity-stale{background:#484f58}
   </style>
 </head>
 <body>
@@ -737,7 +751,10 @@
         </div>
         <div>
           <label>Senha (mín. 6)</label>
-          <input type="password" id="new-user-password" minlength="6" required>
+          <div class="pwd-wrap">
+            <input type="password" id="new-user-password" minlength="6" required>
+            <button type="button" class="pwd-eye" onclick="togglePwdVisibility('new-user-password',this)" title="Mostrar/ocultar senha">👁</button>
+          </div>
         </div>
         <div>
           <label>Tipo</label>
@@ -2906,6 +2923,13 @@ function closeUsersModal(){
   document.body.style.overflow='';
 }
 
+function togglePwdVisibility(inputId, btn){
+  const inp=document.getElementById(inputId);
+  if(!inp)return;
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+
 async function refreshUsersList(){
   const el=document.getElementById('users-list');
   el.innerHTML='<div style="color:#8b949e;padding:14px 0">Carregando…</div>';
@@ -2913,24 +2937,49 @@ async function refreshUsersList(){
   if(error){el.innerHTML=`<div class="error-box">⚠️ ${error.message}</div>`;return;}
   if(!data?.length){el.innerHTML='<div style="color:#8b949e">Nenhum usuário.</div>';return;}
   const fmtBR=ts=>ts?new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+  // Activity dot: green if last login within 7 days, yellow within 30, gray otherwise
+  const activityDot=ts=>{
+    if(!ts) return '<span class="activity-dot activity-stale" title="Nunca logou"></span>';
+    const days=(Date.now()-new Date(ts).getTime())/86400000;
+    if(days<=7) return '<span class="activity-dot activity-recent" title="Ativo nos últimos 7 dias"></span>';
+    if(days<=30) return '<span class="activity-dot activity-week" title="Ativo entre 7–30 dias"></span>';
+    return '<span class="activity-dot activity-stale" title="Sem login há mais de 30 dias"></span>';
+  };
   el.innerHTML=`<table class="users-table">
-    <thead><tr><th>E-mail</th><th>Tipo</th><th>Criado</th><th>Último login</th><th>Ações</th></tr></thead>
+    <thead><tr><th>E-mail</th><th>Status</th><th>Tipo</th><th>Criado</th><th>Último login</th><th>Ações</th></tr></thead>
     <tbody>${data.map(u=>{
-      const isMe=u.id===currentUser.id;
-      const isAdmin=u.role==='admin';
-      return`<tr>
-        <td>${u.email}${isMe?' <span style="color:#8b949e;font-size:10px">(você)</span>':''}</td>
+      const isMe=u.user_id===currentUser.id;
+      const isAdmin=u.user_role==='admin';
+      const isDisabled=u.user_disabled===true;
+      const safeEmail=u.user_email.replace(/'/g,"\\'");
+      return`<tr style="${isDisabled?'opacity:.6':''}">
+        <td>${u.user_email}${isMe?' <span style="color:#8b949e;font-size:10px">(você)</span>':''}</td>
+        <td><span class="status-pill ${isDisabled?'status-disabled':'status-active'}">${isDisabled?'BLOQUEADO':'ATIVO'}</span></td>
         <td><span class="role-pill ${isAdmin?'role-admin':'role-user'}">${isAdmin?'ADMIN':'USER'}</span></td>
-        <td style="color:#8b949e;font-size:11px">${fmtBR(u.created_at)}</td>
-        <td style="color:#8b949e;font-size:11px">${fmtBR(u.last_sign_in_at)}</td>
+        <td style="color:#8b949e;font-size:11px">${fmtBR(u.user_created_at)}</td>
+        <td style="color:#8b949e;font-size:11px">${activityDot(u.user_last_sign_in_at)}${fmtBR(u.user_last_sign_in_at)}</td>
         <td>
-          <button class="users-action-btn" onclick="adminToggleRole('${u.id}','${u.role}',${isMe})">${isAdmin?'↓ User':'↑ Admin'}</button>
-          <button class="users-action-btn" onclick="adminResetPassword('${u.id}','${u.email.replace(/'/g,"\\'")}')">🔑 Senha</button>
-          ${isMe?'':`<button class="users-action-btn danger" onclick="adminDeleteUser('${u.id}','${u.email.replace(/'/g,"\\'")}')">🗑️ Excluir</button>`}
+          <button class="users-action-btn" onclick="adminToggleRole('${u.user_id}','${u.user_role}',${isMe})">${isAdmin?'↓ User':'↑ Admin'}</button>
+          ${isMe?'':`<button class="users-action-btn" onclick="adminToggleActive('${u.user_id}',${isDisabled})">${isDisabled?'✅ Reativar':'🚫 Bloquear'}</button>`}
+          <button class="users-action-btn" onclick="adminResetPassword('${u.user_id}','${safeEmail}')">🔑 Senha</button>
+          ${isMe?'':`<button class="users-action-btn danger" onclick="adminDeleteUser('${u.user_id}','${safeEmail}')">🗑️ Excluir</button>`}
         </td>
       </tr>`;
     }).join('')}</tbody>
   </table>`;
+}
+
+async function adminToggleActive(userId, currentlyDisabled){
+  const action = currentlyDisabled ? 'reativar' : 'bloquear';
+  if(!confirm(`Tem certeza que quer ${action} este usuário?`)) return;
+  const{error}=await sb.rpc('admin_toggle_user_active',{p_user_id:userId});
+  if(error){
+    const map={permission_denied:'Sem permissão',cannot_disable_self:'Não é possível bloquear sua própria conta'};
+    showToast('⚠️ '+(map[error.message]||error.message));
+    return;
+  }
+  showToast('✅ Usuário '+(currentlyDisabled?'reativado':'bloqueado'));
+  await refreshUsersList();
 }
 
 async function adminCreateUser(ev){
