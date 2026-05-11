@@ -470,6 +470,17 @@
     body.is-shared .cptab[data-tab="parametros"]{display:none}
     body.is-shared #cp-panel-parametros{display:none!important}
     @media(max-width:680px){.cp-share-btn{font-size:11px;padding:5px 10px}.cp-share-btn .cp-share-label{display:none}}
+    /* ─── WEEKLY MESSAGE BUTTON & MODAL ──────────────────────────────────── */
+    .cp-weekly-btn{background:#21262d;border:1px solid #3fb95066;color:#3fb950;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+    .cp-weekly-btn:hover{background:#0d2118;border-color:#3fb950}
+    .cp-weekly-btn:active{transform:scale(.97)}
+    body.is-shared .cp-weekly-btn{display:none}
+    #weekly-msg-overlay{position:fixed;inset:0;background:#0009;z-index:920;display:none;align-items:center;justify-content:center;padding:16px}
+    #weekly-msg-overlay.open{display:flex}
+    #weekly-msg-modal{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:0;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+    .weekly-msg-text{width:100%;min-height:340px;background:#0d1117;border:1px solid #30363d;border-radius:7px;color:#c9d1d9;font-size:13px;line-height:1.55;padding:14px;font-family:'SF Mono','Menlo','Consolas',ui-monospace,monospace;resize:vertical;outline:none;transition:border-color .15s}
+    .weekly-msg-text:focus{border-color:#58a6ff}
+    @media(max-width:680px){.cp-weekly-btn{font-size:11px;padding:5px 10px}}
     /* ─── LOW CREATIVES WARN (Meta MOF+BOF < 5) ────────────────────────── */
     .low-creatives-warn{display:inline-block;font-size:14px;cursor:help;line-height:1;vertical-align:middle;filter:drop-shadow(0 0 2px #e3b34155)}
     /* ─── AUTH OVERLAY + USERS MODAL ───────────────────────────────────── */
@@ -667,6 +678,7 @@
     <button class="cp-back" onclick="closeClientPage()">← Voltar</button>
     <div class="cp-client-name" id="cp-client-name">—</div>
     <div class="cp-badges" id="cp-badges"></div>
+    <button class="cp-weekly-btn" id="cp-weekly-btn" onclick="openWeeklyMessageModal()" title="Gerar mensagem semanal pronta para enviar ao cliente">📋 Mensagem Semanal</button>
     <button class="cp-share-btn" id="cp-share-btn" onclick="copyShareableLink()" title="Copiar link do cliente para compartilhar">🔗 Link Compartilhável</button>
   </div>
   <div class="cp-kpi-bar" id="cp-kpi-bar"></div>
@@ -737,6 +749,24 @@
         <button class="users-add-btn" type="submit">+ Criar</button>
       </form>
       <div id="users-list">Carregando…</div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY MESSAGE MODAL -->
+<div id="weekly-msg-overlay" onclick="closeWeeklyMessageModal()">
+  <div id="weekly-msg-modal" onclick="event.stopPropagation()">
+    <div class="users-modal-header">
+      <h3>📋 Mensagem Semanal — <span id="weekly-msg-client"></span></h3>
+      <button class="users-modal-close" onclick="closeWeeklyMessageModal()">×</button>
+    </div>
+    <div class="users-modal-body">
+      <div style="font-size:11px;color:#8b949e;margin-bottom:10px">Edite à vontade antes de copiar. Período usado: <b id="weekly-msg-period"></b></div>
+      <textarea id="weekly-msg-text" class="weekly-msg-text" spellcheck="false"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button class="users-action-btn" onclick="closeWeeklyMessageModal()">Cancelar</button>
+        <button class="users-add-btn" onclick="copyWeeklyMessageNow()">📋 Copiar mensagem</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1403,6 +1433,104 @@ function showToast(msg){
   clearTimeout(t._timer);
   t._timer=setTimeout(()=>t.classList.remove('visible'),2400);
 }
+// ─── WEEKLY MESSAGE GENERATOR ───────────────────────────────────────────────
+function buildWeeklyMessage(){
+  if(!cpClient||!cpChannel||!RAW[cpChannel]?.length)return null;
+  const dateKey=CFG[cpChannel].dateKey, accountKey=CFG[cpChannel].accountKey;
+  const clientRows=RAW[cpChannel].filter(r=>r[accountKey]?.trim()===cpClient);
+  if(!clientRows.length)return null;
+  const maxD=maxDate(clientRows,dateKey);
+  if(!maxD)return null;
+  const p1s=addDays(maxD,-6), p1e=maxD;
+  const p2s=addDays(maxD,-13), p2e=addDays(maxD,-7);
+
+  const sumPeriod=(s,e)=>{
+    let spend=0,conv=0;
+    clientRows.forEach(r=>{
+      const d=fmtDate(r[dateKey]);
+      if(!inRange(d,s,e))return;
+      if(cpChannel==='meta'){
+        spend+=num(r['Valor investido']);
+        conv +=num(r['Número de conversas iniciadas no Whatsapp'])+num(r['Leads'])+num(r['Número de vendas']);
+      } else {
+        spend+=num(r['Gasto']);
+        conv +=num(r['Conversões']);
+      }
+    });
+    return{spend,conv};
+  };
+  const cur=sumPeriod(p1s,p1e);
+  const prv=sumPeriod(p2s,p2e);
+
+  const fmtPctDiff=(c,p)=>{
+    if(p===0&&c===0)return'sem variação (ambos zero)';
+    if(p===0)return c>0?'+100% (de 0)':'—';
+    const pct=((c-p)/p)*100;
+    const sign=pct>=0?'+':'';
+    return `${sign}${pct.toFixed(1).replace('.',',')}%`;
+  };
+
+  // Get AI insights for the last-7-days window (temporarily swap globals)
+  const _row=cpAllRows,_per=cpPeriod,_st=cpStats;
+  const p7=buildPeriod(p1s,p1e);
+  cpPeriod=p7;
+  cpAllRows=clientRows.filter(r=>inRange(fmtDate(r[dateKey]),p1s,p1e));
+  cpStats=buildStats(RAW[cpChannel],CFG[cpChannel],p7).find(s=>s.name===cpClient)||null;
+  const ins=buildClientInsights();
+  // restore
+  cpAllRows=_row; cpPeriod=_per; cpStats=_st;
+
+  const proximos = ins?.plan?.length
+    ? ins.plan.map(p=>`   • ${p.level}: ${p.action}`).join('\n')
+    : '   • Performance estável — manter monitoramento e testar novos criativos';
+
+  const msg = `Bom dia! Segue os dados dos últimos 7 dias (${fmtBR(p1s)} – ${fmtBR(p1e)}):
+
+• Valor investido: ${fmtMoney(cur.spend)}
+• Conversões: ${fmtNum(cur.conv)}
+
+Comparação com os 7 dias anteriores (${fmtBR(p2s)} – ${fmtBR(p2e)}):
+   • Conversões: ${fmtNum(prv.conv)} → ${fmtNum(cur.conv)} (${fmtPctDiff(cur.conv,prv.conv)})
+   • Investimento: ${fmtMoney(prv.spend)} → ${fmtMoney(cur.spend)} (${fmtPctDiff(cur.spend,prv.spend)})
+
+Próximos passos:
+${proximos}`;
+
+  return {msg, periodLabel:`${fmtBR(p1s)} – ${fmtBR(p1e)}`};
+}
+
+function openWeeklyMessageModal(){
+  if(!cpClient||!cpChannel){showToast('⚠️ Abra um cliente primeiro');return;}
+  const result=buildWeeklyMessage();
+  if(!result){showToast('⚠️ Sem dados suficientes para gerar a mensagem');return;}
+  document.getElementById('weekly-msg-client').textContent=cpClient;
+  document.getElementById('weekly-msg-period').textContent=result.periodLabel;
+  document.getElementById('weekly-msg-text').value=result.msg;
+  document.getElementById('weekly-msg-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeWeeklyMessageModal(){
+  document.getElementById('weekly-msg-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function copyWeeklyMessageNow(){
+  const txt=document.getElementById('weekly-msg-text').value;
+  if(navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(txt).then(()=>{
+      showToast('📋 Mensagem copiada');
+      closeWeeklyMessageModal();
+    }).catch(()=>{
+      document.getElementById('weekly-msg-text').select();
+      showToast('⚠️ Selecione o texto e Cmd+C');
+    });
+  } else {
+    document.getElementById('weekly-msg-text').select();
+    showToast('⚠️ Selecione o texto e Cmd+C');
+  }
+}
+
 function copyShareableLink(){
   if(!cpClient||!cpChannel){showToast('⚠️ Abra um cliente primeiro');return;}
   const url=`${location.origin}${location.pathname}?cliente=${encodeURIComponent(cpClient)}&canal=${cpChannel}&shared=1`;
