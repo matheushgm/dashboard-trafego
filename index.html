@@ -1532,14 +1532,26 @@ function buildWeeklyMessage(){
   const steps = buildClientFacingSteps(lastWeekRows, cpChannel);
   const proximos = steps.map(s => `• ${s}`).join('\n');
 
+  const curCpl = cur.conv > 0 ? cur.spend / cur.conv : null;
+  const prvCpl = prv.conv > 0 ? prv.spend / prv.conv : null;
+  const fmtCpl = v => v == null ? 'sem conversões' : fmtMoney(v);
+  const fmtCplDiff = (c, p) => {
+    if (c == null && p == null) return 'sem conversões em ambos';
+    if (p == null) return `de sem conversões para ${fmtMoney(c)}`;
+    if (c == null) return `de ${fmtMoney(p)} para sem conversões`;
+    return `${fmtMoney(p)} → ${fmtMoney(c)} (${fmtPctDiff(c, p)})`;
+  };
+
   const msg = `Bom dia! Segue os dados dos últimos 7 dias (${fmtBR(p1s)} – ${fmtBR(p1e)}):
 
 • Valor investido: ${fmtMoney(cur.spend)}
 • Conversões: ${fmtNum(cur.conv)}
+• Custo por conversão: ${fmtCpl(curCpl)}
 
 Comparação com os 7 dias anteriores (${fmtBR(p2s)} – ${fmtBR(p2e)}):
    • Conversões: ${fmtNum(prv.conv)} → ${fmtNum(cur.conv)} (${fmtPctDiff(cur.conv,prv.conv)})
    • Investimento: ${fmtMoney(prv.spend)} → ${fmtMoney(cur.spend)} (${fmtPctDiff(cur.spend,prv.spend)})
+   • Custo por conversão: ${fmtCplDiff(curCpl, prvCpl)}
 
 Próximos passos:
 ${proximos}`;
