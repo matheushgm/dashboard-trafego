@@ -2895,7 +2895,18 @@ async function onAuthenticated(session){
 }
 
 async function bootAuth(){
-  // Check existing session
+  // Shared-link bypass: links with ?shared=1&cliente=X&canal=Y skip auth so
+  // the client (who isn't a system user) can view their own data.
+  const params=new URLSearchParams(location.search);
+  const isSharedLink=params.get('shared')==='1' && params.get('cliente') && params.get('canal');
+  if(isSharedLink){
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('loader').style.display='block';
+    await loadAll();      // applySharedModeIfRequested runs inside loadAll
+    return;
+  }
+
+  // Normal auth flow
   const{data:{session}}=await sb.auth.getSession();
   if(session) {
     await onAuthenticated(session);
