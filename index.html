@@ -2362,7 +2362,7 @@ function aggClientMetrics(rows){
   const spend=rows.reduce((a,r)=>a+num(r['Gasto']),0);
   const clicks=rows.reduce((a,r)=>a+(num(r['CLiques'])||num(r['Cliques'])),0);
   const conv=rows.reduce((a,r)=>a+num(r['Conversões']),0);
-  const impressions=rows.reduce((a,r)=>a+(num(r['Impressões na parte superior'])||num(r['Impressões'])),0);
+  const impressions=rows.reduce((a,r)=>a+(num(r['Impressões'])||num(r['Impressões na parte superior'])),0);
   return{
     spend,impressions,clicks,conv,
     cpc:clicks>0?spend/clicks:null,
