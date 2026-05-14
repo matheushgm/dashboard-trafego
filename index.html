@@ -473,6 +473,20 @@
     body.is-shared #cp-panel-atividades{display:none!important}
     body.is-shared .ins-card{display:none!important}
     body.is-shared .flag-row{display:none!important}
+    /* ─── CLIENT PAGE PERIOD SELECTOR ────────────────────────────────────── */
+    .cp-period-bar{background:#0d1117;border-bottom:1px solid #21262d;padding:8px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
+    .cp-period-label{font-size:11px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+    .cp-period-presets{display:flex;gap:5px;flex-wrap:wrap}
+    .cp-period-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all .12s;white-space:nowrap}
+    .cp-period-btn:hover{background:#30363d;color:#c9d1d9}
+    .cp-period-btn.active{background:#1f6feb;border-color:#388bfd;color:#fff}
+    .cp-period-custom{display:flex;gap:6px;align-items:center}
+    .cp-period-custom input{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:5px 8px;font-size:11px;color:#c9d1d9;outline:none}
+    .cp-period-custom input:focus{border-color:#58a6ff}
+    .cp-period-apply{background:#1f6feb;border:1px solid #388bfd;color:#fff;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600}
+    .cp-period-apply:hover{background:#388bfd}
+    .cp-period-info{font-size:11px;color:#8b949e;margin-left:auto;white-space:nowrap}
+    @media(max-width:680px){.cp-period-bar{padding:8px 14px}.cp-period-info{margin-left:0;width:100%}}
     @media(max-width:680px){.cp-share-btn{font-size:11px;padding:5px 10px}.cp-share-btn .cp-share-label{display:none}}
     /* ─── WEEKLY MESSAGE BUTTON & MODAL ──────────────────────────────────── */
     .cp-weekly-btn{background:#21262d;border:1px solid #3fb95066;color:#3fb950;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
@@ -698,6 +712,24 @@
     <div class="cp-badges" id="cp-badges"></div>
     <button class="cp-weekly-btn" id="cp-weekly-btn" onclick="openWeeklyMessageModal()" title="Gerar mensagem semanal pronta para enviar ao cliente">📋 Mensagem Semanal</button>
     <button class="cp-share-btn" id="cp-share-btn" onclick="copyShareableLink()" title="Copiar link do cliente para compartilhar">🔗 Link Compartilhável</button>
+  </div>
+  <div class="cp-period-bar">
+    <span class="cp-period-label">Período:</span>
+    <div class="cp-period-presets">
+      <button class="cp-period-btn" data-days="today" onclick="setCpPeriod('today')">Hoje</button>
+      <button class="cp-period-btn" data-days="yesterday" onclick="setCpPeriod('yesterday')">Ontem</button>
+      <button class="cp-period-btn" data-days="3" onclick="setCpPeriod(3)">Últ. 3 dias</button>
+      <button class="cp-period-btn" data-days="7" onclick="setCpPeriod(7)">Últ. 7 dias</button>
+      <button class="cp-period-btn" data-days="14" onclick="setCpPeriod(14)">Últ. 14 dias</button>
+      <button class="cp-period-btn" data-days="30" onclick="setCpPeriod(30)">Últ. 30 dias</button>
+      <button class="cp-period-btn" data-days="0" onclick="setCpPeriod(0)">Personalizado</button>
+    </div>
+    <div class="cp-period-custom" id="cp-period-custom" style="display:none">
+      <input type="date" id="cp-date-from">
+      <input type="date" id="cp-date-to">
+      <button class="cp-period-apply" onclick="applyCpCustom()">Aplicar</button>
+    </div>
+    <span class="cp-period-info" id="cp-period-info"></span>
   </div>
   <div class="cp-kpi-bar" id="cp-kpi-bar"></div>
   <div class="cp-tabs" id="cp-tabs">
@@ -2115,6 +2147,84 @@ let cpCharts    = {};
 let _cuMapCurrentClient = null;
 
 // ─── OPEN / CLOSE CLIENT PAGE ────────────────────────────────────────────────
+// ─── CLIENT PAGE PERIOD SELECTOR ────────────────────────────────────────────
+let cpPeriodDays = 7;
+
+function _cpComputePeriod(days){
+  const dateKey = CFG[cpChannel].dateKey;
+  if(days==='today'){
+    const max=maxDate(RAW[cpChannel],dateKey);
+    return max ? buildPeriod(max,max) : null;
+  }
+  if(days==='yesterday'){
+    const max=maxDate(RAW[cpChannel],dateKey);
+    if(!max) return null;
+    const y=addDays(max,-1);
+    return buildPeriod(y,y);
+  }
+  return periodFromDays(RAW[cpChannel],dateKey,days);
+}
+
+function _cpApplyPeriod(p){
+  cpPeriod = p;
+  const dateKey = CFG[cpChannel].dateKey;
+  cpAllRows = RAW[cpChannel].filter(r=>{
+    const name=r[CFG[cpChannel].accountKey]?.trim();
+    const date=fmtDate(r[dateKey]);
+    return name===cpClient && p && inRange(date,p.p1s,p.p1e);
+  });
+  const allStats = buildStats(RAW[cpChannel], CFG[cpChannel], p);
+  cpStats = allStats.find(s=>s.name===cpClient)||null;
+  // Reset campaign drill-down state
+  drawerCampaignFilter=null; drawerAdsetFilter=null;
+  _cpSyncPeriodUI();
+  // Re-render
+  renderCpKpiBar();
+  const campEl=document.getElementById('cp-panel-campanhas');
+  if(campEl) campEl.dataset.rendered='';
+  if(cpActiveTab==='campanhas') renderCpCampanhas();
+  else renderCpResultados();
+}
+
+function _cpSyncPeriodUI(){
+  document.querySelectorAll('.cp-period-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.days===String(cpPeriodDays)));
+  const customEl=document.getElementById('cp-period-custom');
+  if(customEl) customEl.style.display = cpPeriodDays===0 ? 'flex' : 'none';
+  if(cpPeriodDays===0 && cpPeriod){
+    document.getElementById('cp-date-from').value=cpPeriod.p1s;
+    document.getElementById('cp-date-to').value=cpPeriod.p1e;
+  }
+  const info=document.getElementById('cp-period-info');
+  if(info) info.textContent = cpPeriod ? `${cpPeriod.label1} · vs ${cpPeriod.label2}` : 'Sem dados no período';
+}
+
+function setCpPeriod(days){
+  if(!cpClient||!cpChannel) return;
+  cpPeriodDays = days;
+  if(days===0){
+    // Show custom inputs and wait for "Aplicar"
+    document.querySelectorAll('.cp-period-btn').forEach(b=>
+      b.classList.toggle('active', b.dataset.days==='0'));
+    document.getElementById('cp-period-custom').style.display='flex';
+    if(cpPeriod){
+      document.getElementById('cp-date-from').value=cpPeriod.p1s;
+      document.getElementById('cp-date-to').value=cpPeriod.p1e;
+    }
+    return;
+  }
+  _cpApplyPeriod(_cpComputePeriod(days));
+}
+
+function applyCpCustom(){
+  const from=document.getElementById('cp-date-from').value;
+  const to  =document.getElementById('cp-date-to').value;
+  if(!from||!to){showToast('⚠️ Selecione as duas datas');return;}
+  if(from>to){showToast('⚠️ A data inicial deve ser anterior à final');return;}
+  cpPeriodDays=0;
+  _cpApplyPeriod(buildPeriod(from,to));
+}
+
 function openClientPage(clientName, channel){
   cpClient   = clientName;
   cpChannel  = channel;
@@ -2131,6 +2241,8 @@ function openClientPage(clientName, channel){
     p=periodFromDays(RAW[channel],dateKey,activeDays);
   }
   cpPeriod = p;
+  // Sync the in-page period selector with the global filter state
+  cpPeriodDays = (activeDays===0||activeDays==='today'||activeDays==='yesterday'||[3,7,14,30].includes(activeDays)) ? activeDays : 7;
 
   cpAllRows = RAW[channel].filter(r=>{
     const name=r[CFG[channel].accountKey]?.trim();
@@ -2151,6 +2263,9 @@ function openClientPage(clientName, channel){
 
   // KPI bar
   renderCpKpiBar();
+
+  // Sync the in-page period selector UI
+  _cpSyncPeriodUI();
 
   // Reset tabs to Resultados
   const tabKeys=['resultados','campanhas','atividades','parametros'];
