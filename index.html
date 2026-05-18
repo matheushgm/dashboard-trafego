@@ -487,6 +487,25 @@
     .cp-period-apply:hover{background:#388bfd}
     .cp-period-info{font-size:11px;color:#8b949e;margin-left:auto;white-space:nowrap}
     @media(max-width:680px){.cp-period-bar{padding:8px 14px}.cp-period-info{margin-left:0;width:100%}}
+    /* Campaign filter dropdown */
+    .cp-camp-filter{position:relative}
+    .cp-camp-filter-btn{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all .12s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+    .cp-camp-filter-btn:hover{background:#30363d}
+    .cp-camp-filter-btn.active{background:#0c1a2e;border-color:#58a6ff;color:#58a6ff}
+    .cp-camp-filter-panel{position:absolute;top:calc(100% + 6px);left:0;width:420px;max-width:90vw;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px;z-index:500;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:8px}
+    .cp-camp-search{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 10px;font-size:12px;color:#c9d1d9;outline:none}
+    .cp-camp-search:focus{border-color:#58a6ff}
+    .cp-camp-quick{display:flex;gap:6px}
+    .cp-camp-quick button{flex:1;background:#0d1117;border:1px solid #30363d;color:#8b949e;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:600;transition:all .12s}
+    .cp-camp-quick button:hover{background:#21262d;color:#c9d1d9}
+    .cp-camp-list{overflow-y:auto;max-height:320px;border:1px solid #21262d;border-radius:6px;background:#0d1117}
+    .cp-camp-list-item{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid #161b22;font-size:11px;color:#c9d1d9}
+    .cp-camp-list-item:last-child{border-bottom:none}
+    .cp-camp-list-item:hover{background:#161b22}
+    .cp-camp-list-item input[type=checkbox]{accent-color:#58a6ff;flex-shrink:0}
+    .cp-camp-list-item .cp-camp-list-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cp-camp-list-item .cp-camp-list-spend{color:#8b949e;font-size:10px;flex-shrink:0}
+    .cp-camp-list-empty{padding:20px;text-align:center;color:#8b949e;font-size:11px}
     @media(max-width:680px){.cp-share-btn{font-size:11px;padding:5px 10px}.cp-share-btn .cp-share-label{display:none}}
     /* ─── WEEKLY MESSAGE BUTTON & MODAL ──────────────────────────────────── */
     .cp-weekly-btn{background:#21262d;border:1px solid #3fb95066;color:#3fb950;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
@@ -728,6 +747,19 @@
       <input type="date" id="cp-date-from">
       <input type="date" id="cp-date-to">
       <button class="cp-period-apply" onclick="applyCpCustom()">Aplicar</button>
+    </div>
+    <div class="cp-camp-filter" id="cp-camp-filter-wrap">
+      <button class="cp-camp-filter-btn" id="cp-camp-filter-btn" onclick="toggleCpCampaignFilter(event)">
+        🔍 Campanhas: <b id="cp-camp-filter-label">todas</b> <span style="opacity:.6;margin-left:4px">▾</span>
+      </button>
+      <div class="cp-camp-filter-panel" id="cp-camp-filter-panel" style="display:none">
+        <input class="cp-camp-search" id="cp-camp-search" placeholder="Buscar campanha…" oninput="renderCpCampaignFilterList()">
+        <div class="cp-camp-quick">
+          <button onclick="selectAllCpCampaigns(true)">Selecionar todas</button>
+          <button onclick="selectAllCpCampaigns(false)">Limpar</button>
+        </div>
+        <div class="cp-camp-list" id="cp-camp-list"></div>
+      </div>
     </div>
     <span class="cp-period-info" id="cp-period-info"></span>
   </div>
@@ -2147,8 +2179,13 @@ let cpCharts    = {};
 let _cuMapCurrentClient = null;
 
 // ─── OPEN / CLOSE CLIENT PAGE ────────────────────────────────────────────────
-// ─── CLIENT PAGE PERIOD SELECTOR ────────────────────────────────────────────
+// ─── CLIENT PAGE PERIOD SELECTOR & CAMPAIGN FILTER ──────────────────────────
 let cpPeriodDays = 7;
+let cpCampaignFilter = []; // [] = todas; nomes de campanhas a incluir
+
+function _cpCampaignKey(){
+  return cpChannel==='meta' ? 'Nome da campanha' : 'Campanha';
+}
 
 function _cpComputePeriod(days){
   const dateKey = CFG[cpChannel].dateKey;
@@ -2165,25 +2202,147 @@ function _cpComputePeriod(days){
   return periodFromDays(RAW[cpChannel],dateKey,days);
 }
 
+// Recompute cpAllRows + cpStats respecting the current campaign filter
+function _cpRebuildFilteredData(){
+  if(!cpClient||!cpChannel||!cpPeriod){cpAllRows=[];cpStats=null;return;}
+  const p=cpPeriod;
+  const dateKey=CFG[cpChannel].dateKey;
+  const accountKey=CFG[cpChannel].accountKey;
+  const campKey=_cpCampaignKey();
+  const campSet=cpCampaignFilter.length ? new Set(cpCampaignFilter) : null;
+  const matchesCamp=r=>!campSet || campSet.has((r[campKey]||'').trim());
+
+  cpAllRows = RAW[cpChannel].filter(r=>{
+    const name=r[accountKey]?.trim();
+    const date=fmtDate(r[dateKey]);
+    return name===cpClient && inRange(date,p.p1s,p.p1e) && matchesCamp(r);
+  });
+
+  // For stats (current + previous period), filter RAW by campaign before building
+  const subset = campSet
+    ? RAW[cpChannel].filter(r=>matchesCamp(r))
+    : RAW[cpChannel];
+  const allStats = buildStats(subset, CFG[cpChannel], p);
+  cpStats = allStats.find(s=>s.name===cpClient) || null;
+}
+
 function _cpApplyPeriod(p){
   cpPeriod = p;
-  const dateKey = CFG[cpChannel].dateKey;
-  cpAllRows = RAW[cpChannel].filter(r=>{
-    const name=r[CFG[cpChannel].accountKey]?.trim();
-    const date=fmtDate(r[dateKey]);
-    return name===cpClient && p && inRange(date,p.p1s,p.p1e);
-  });
-  const allStats = buildStats(RAW[cpChannel], CFG[cpChannel], p);
-  cpStats = allStats.find(s=>s.name===cpClient)||null;
+  _cpRebuildFilteredData();
   // Reset campaign drill-down state
   drawerCampaignFilter=null; drawerAdsetFilter=null;
   _cpSyncPeriodUI();
+  _cpSyncCampaignFilterButton();
   // Re-render
   renderCpKpiBar();
   const campEl=document.getElementById('cp-panel-campanhas');
   if(campEl) campEl.dataset.rendered='';
   if(cpActiveTab==='campanhas') renderCpCampanhas();
   else renderCpResultados();
+}
+
+// ─── Campaign filter UI ──────────────────────────────────────────────────────
+function _cpAvailableCampaigns(){
+  if(!cpClient||!cpChannel||!cpPeriod) return [];
+  const dateKey=CFG[cpChannel].dateKey, accountKey=CFG[cpChannel].accountKey;
+  const campKey=_cpCampaignKey();
+  const spendKey=cpChannel==='meta' ? 'Valor investido' : 'Gasto';
+  const map={};
+  RAW[cpChannel].forEach(r=>{
+    const name=r[accountKey]?.trim();
+    const date=fmtDate(r[dateKey]);
+    if(name!==cpClient || !inRange(date,cpPeriod.p1s,cpPeriod.p1e)) return;
+    const camp=(r[campKey]||'').trim();
+    if(!camp) return;
+    if(!map[camp]) map[camp]={name:camp,spend:0};
+    map[camp].spend += num(r[spendKey]);
+  });
+  return Object.values(map).sort((a,b)=>b.spend-a.spend);
+}
+
+function _cpSyncCampaignFilterButton(){
+  const lbl=document.getElementById('cp-camp-filter-label');
+  const btn=document.getElementById('cp-camp-filter-btn');
+  if(!lbl||!btn)return;
+  const n=cpCampaignFilter.length;
+  lbl.textContent = n===0 ? 'todas' : (n===1 ? '1 selecionada' : `${n} selecionadas`);
+  btn.classList.toggle('active', n>0);
+}
+
+function renderCpCampaignFilterList(){
+  const list=document.getElementById('cp-camp-list');
+  if(!list)return;
+  const q=(document.getElementById('cp-camp-search')?.value||'').toLowerCase().trim();
+  const all=_cpAvailableCampaigns();
+  const filtered=q ? all.filter(c=>c.name.toLowerCase().includes(q)) : all;
+  if(!filtered.length){list.innerHTML='<div class="cp-camp-list-empty">Nenhuma campanha</div>';return;}
+  const selectedSet=new Set(cpCampaignFilter);
+  list.innerHTML=filtered.map(c=>{
+    const id='cp-camp-cb-'+c.name.replace(/[^a-zA-Z0-9]/g,'_');
+    const checked=selectedSet.has(c.name)?'checked':'';
+    const esc=c.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return `<label class="cp-camp-list-item" for="${id}">
+      <input type="checkbox" id="${id}" ${checked} onchange="onCpCampaignToggle('${c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}',this.checked)">
+      <span class="cp-camp-list-name" title="${esc}">${esc}</span>
+      <span class="cp-camp-list-spend">${fmtMoney(c.spend)}</span>
+    </label>`;
+  }).join('');
+}
+
+function onCpCampaignToggle(name, checked){
+  const set=new Set(cpCampaignFilter);
+  if(checked) set.add(name); else set.delete(name);
+  cpCampaignFilter=[...set];
+  _cpRebuildFilteredData();
+  _cpSyncCampaignFilterButton();
+  drawerCampaignFilter=null; drawerAdsetFilter=null;
+  renderCpKpiBar();
+  const campEl=document.getElementById('cp-panel-campanhas');
+  if(campEl) campEl.dataset.rendered='';
+  if(cpActiveTab==='campanhas') renderCpCampanhas();
+  else renderCpResultados();
+}
+
+function selectAllCpCampaigns(selectAll){
+  if(selectAll){
+    cpCampaignFilter = _cpAvailableCampaigns().map(c=>c.name);
+  } else {
+    cpCampaignFilter = [];
+  }
+  _cpRebuildFilteredData();
+  _cpSyncCampaignFilterButton();
+  drawerCampaignFilter=null; drawerAdsetFilter=null;
+  renderCpCampaignFilterList();
+  renderCpKpiBar();
+  const campEl=document.getElementById('cp-panel-campanhas');
+  if(campEl) campEl.dataset.rendered='';
+  if(cpActiveTab==='campanhas') renderCpCampanhas();
+  else renderCpResultados();
+}
+
+function toggleCpCampaignFilter(ev){
+  if(ev) ev.stopPropagation();
+  const panel=document.getElementById('cp-camp-filter-panel');
+  if(!panel) return;
+  const willOpen = panel.style.display==='none';
+  panel.style.display = willOpen ? 'flex' : 'none';
+  if(willOpen){
+    document.getElementById('cp-camp-search').value='';
+    renderCpCampaignFilterList();
+    // Close on outside click
+    setTimeout(()=>document.addEventListener('click', _cpCampaignFilterOutside, {once:true}), 0);
+  }
+}
+
+function _cpCampaignFilterOutside(e){
+  const wrap=document.getElementById('cp-camp-filter-wrap');
+  const panel=document.getElementById('cp-camp-filter-panel');
+  if(wrap && !wrap.contains(e.target) && panel){
+    panel.style.display='none';
+  } else if(panel && panel.style.display!=='none'){
+    // still open — re-arm
+    setTimeout(()=>document.addEventListener('click', _cpCampaignFilterOutside, {once:true}), 0);
+  }
 }
 
 function _cpSyncPeriodUI(){
@@ -2229,6 +2388,7 @@ function openClientPage(clientName, channel){
   cpClient   = clientName;
   cpChannel  = channel;
   cpActiveTab= 'resultados';
+  cpCampaignFilter = []; // reset campaign filter when changing client
 
   // Build period (same logic as openDrawer)
   const dateKey = CFG[channel].dateKey;
@@ -2244,15 +2404,8 @@ function openClientPage(clientName, channel){
   // Sync the in-page period selector with the global filter state
   cpPeriodDays = (activeDays===0||activeDays==='today'||activeDays==='yesterday'||[3,7,14,30].includes(activeDays)) ? activeDays : 7;
 
-  cpAllRows = RAW[channel].filter(r=>{
-    const name=r[CFG[channel].accountKey]?.trim();
-    const date=fmtDate(r[dateKey]);
-    return name===clientName && p && inRange(date,p.p1s,p.p1e);
-  });
-
-  // Find client stats object
-  const allStats = buildStats(RAW[channel], CFG[channel], p);
-  cpStats = allStats.find(s=>s.name===clientName)||null;
+  // Build filtered rows + stats (respecting campaign filter — empty here)
+  _cpRebuildFilteredData();
 
   // Header
   document.getElementById('cp-client-name').textContent = clientName;
@@ -2266,6 +2419,7 @@ function openClientPage(clientName, channel){
 
   // Sync the in-page period selector UI
   _cpSyncPeriodUI();
+  _cpSyncCampaignFilterButton();
 
   // Reset tabs to Resultados
   const tabKeys=['resultados','campanhas','atividades','parametros'];
