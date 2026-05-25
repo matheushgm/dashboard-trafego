@@ -1987,9 +1987,10 @@ function renderMetaCampaigns(rows){
     ?`<div class="flag-row">${flags.map(g=>`<span class="flag flag-red">🚨 ${g.key} — gasto sem conv.</span>`).join('')}</div>`:'' ;
 
   return flagsHtml+`<div class="dt-wrap"><table>
-    <thead><tr><th>Campanha</th><th>Status</th><th>Conv.</th><th>Gasto</th><th>CPL</th><th>Tx. Conv.</th><th>Impressões</th><th>Cliques</th></tr></thead>
+    <thead><tr><th>Campanha</th><th>Status</th><th>Conv.</th><th>Gasto</th><th>CPL</th><th>Tx. Conv.</th><th>CTR</th><th>Impressões</th><th>Cliques</th></tr></thead>
     <tbody>${groups.map((g,i)=>{
       const cpl=g.conv>0?g.spend/g.conv:null;
+      const ctr=g.impressions>0?(g.clicks/g.impressions)*100:null;
       const status=rows.find(r=>r['Nome da campanha']===g.key)?.[' Status da Campanha']
                 || rows.find(r=>r['Nome da campanha']===g.key)?.['Status da Campanha']||'';
       return`<tr>
@@ -1999,6 +2000,7 @@ function renderMetaCampaigns(rows){
         <td>${fmtMoney(g.spend)}</td>
         <td>${fmtMoney(cpl)}</td>
         <td>${txConvCell(g.leads,g.clicks)}</td>
+        <td>${ctrCell(ctr)}</td>
         <td>${fmtNum(g.impressions)}</td>
         <td>${fmtNum(g.clicks)}</td>
       </tr>`;
@@ -2022,9 +2024,10 @@ function renderMetaAdsets(rows){
     ?`<div class="flag-row">${flags.map(g=>`<span class="flag flag-red">🚨 ${g.key} — gasto sem conv.</span>`).join('')}</div>`:'' ;
 
   return flagsHtml+`<div class="dt-wrap"><table>
-    <thead><tr><th>Conjunto</th><th>Status</th><th>Conv.</th><th>Gasto</th><th>CPL</th><th>Tx. Conv.</th><th>Impressões</th></tr></thead>
+    <thead><tr><th>Conjunto</th><th>Status</th><th>Conv.</th><th>Gasto</th><th>CPL</th><th>Tx. Conv.</th><th>CTR</th><th>Impressões</th></tr></thead>
     <tbody>${groups.map((g,i)=>{
       const cpl=g.conv>0?g.spend/g.conv:null;
+      const ctr=g.impressions>0?(g.clicks/g.impressions)*100:null;
       const status=rows.find(r=>r['Conjunto de Anúncio']===g.key)?.['Status do Conjunto de Anúncio']||'';
       return`<tr>
         <td class="ad-name" title="${g.key}"><span class="drill-link" onclick="drillAdset('${g.key.replace(/'/g,"\\'")}')">${i===0&&g.conv>0?'🏆 ':''}${g.key}</span></td>
@@ -2033,6 +2036,7 @@ function renderMetaAdsets(rows){
         <td>${fmtMoney(g.spend)}</td>
         <td>${fmtMoney(cpl)}</td>
         <td>${txConvCell(g.leads,g.clicks)}</td>
+        <td>${ctrCell(ctr)}</td>
         <td>${fmtNum(g.impressions)}</td>
       </tr>`;
     }).join('')}</tbody>
